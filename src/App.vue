@@ -1,42 +1,20 @@
 <template>
-  <header>
-    <h2>Авторизация</h2>
-    <div>
-      <input type="email" v-model="email" placeholder="Email" required />
-<!--      <p v-if="emailError" class="error">{{ emailError }}</p>-->
-      <input type="password" v-model="password" placeholder="Пароль" required />
-<!--      <p v-if="passwordError" class="error">{{ passwordError }}</p>-->
-      <input type="submit" @click.prevent="signIn" value="Войти"/>
-    </div>
-<!--    <p v-if="errorUser">{{ errorUser }}</p>-->
-  </header>
+  <h1>Главная</h1>
+<main>
+  <router-view></router-view>
+</main>
 </template>
 
 <script setup>
 import axios from "axios";
 import {thisUrl} from "./url.js";
 import {ref} from "vue";
+import AppAuth from "@/components/AppAuth.vue"
+import AppReg from "@/components/AppReg.vue";
+import AppSendEmail from "@/components/AppSendEmail.vue";
 
-let email = ref('')
-let password = ref('')
 
 
-const signIn = async()=> {
-  try {
-    console.log(email.value, password.value)
-    const response = await axios.post(`${thisUrl()}/auth/login`,
-      {
-        email: email.value,
-        password: password.value,
-      })
-    const token = response.data.access_token
-    console.log(token)
-  }
-  catch(error) {
-    console.log(error)
-    throw error
-  }
-}
 </script>
 
 <style scoped>

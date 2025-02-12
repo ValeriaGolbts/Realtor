@@ -1,86 +1,44 @@
 <template>
-  <div class="auth">
+  <header>
     <h2>Авторизация</h2>
-    <form @submit.prevent="handleSubmit">
-      <input type="email" v-model="formData.email" placeholder="Email" required />
-      <p v-if="emailError" class="error">{{ emailError }}</p>
-      <input type="password" v-model="formData.password" placeholder="Пароль" required />
-      <p v-if="passwordError" class="error">{{ passwordError }}</p>
-      <button type="submit">Войти</button>
-      <button type="button"><router-link class="reg" to="/reg">Зарегистрироваться</router-link></button>
-    </form>
-    <p v-if="errorUser">{{ errorUser }}</p>
-  </div>
+    <div>
+      <input type="email" v-model="email" placeholder="Email" required />
+      <!--      <p v-if="emailError" class="error">{{ emailError }}</p>-->
+      <input type="password" v-model="password" placeholder="Пароль" required />
+      <!--      <p v-if="passwordError" class="error">{{ passwordError }}</p>-->
+      <input type="submit" @click.prevent="signIn" value="Войти"/>
+    </div>
+    <!--    <p v-if="errorUser">{{ errorUser }}</p>-->
+  </header>
+  <AppAuth/>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/userStore';
+import axios from "axios";
+import {thisUrl} from "../url.js";
+import {ref} from "vue";
+import AppAuth from "@/components/AppAuth.vue"
 
-const formData = ref({
-  email: '',
-  password: '',
-});
-const errorUser = ref('');
-const emailError = ref('');
-const passwordError = ref('');
-const router = useRouter();
-const userStore = useUserStore();
+let email = ref('')
+let password = ref('')
 
-const validateEmail = (email) => {
-  const re = /^[A-z0-9._%+-]+@[A-z0-9.-]+\.[A-z]{2,}$/;
-  return re.test(email);
-};
 
-const handleSubmit = async () => {
-  emailError.value = '';
-  passwordError.value = '';
-
-  if (!validateEmail(formData.value.email)) {
-    emailError.value = 'Неверный формат email';
-    return;
-  }
-
-  if (formData.value.password.length < 6) {
-    passwordError.value = 'Пароль должен содержать минимум 6 символов.';
-    return;
-  }
-
+const signIn = async()=> {
   try {
-    const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB9Cx6vMAu9DgAY4Ey2R199ZEc-IjXeQGM`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: formData.value.email,
-        password: formData.value.password,
-        returnSecureToken: true,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error.message);
-    }
-
-    const data = await response.json();
-    userStore.setUser(data);
-    router.push('/dashboard');
-  } catch (error) {
-    if (error.message.includes('EMAIL_NOT_FOUND')) {
-      emailError.value = 'Пользователь с таким email не найден.';
-      errorUser.value = '';
-    } else if (error.message.includes('INVALID_PASSWORD')) {
-      passwordError.value = 'Пароль должен содержать не менее 8 символов';
-      errorUser.value = '';
-    } else {
-      errorUser.value = 'Ошибка при авторизации: ' + error.message;
-      console.error('Ошибка:', error.message);
-    }
+    console.log(email.value, password.value)
+    const response = await axios.post(`${thisUrl()}/auth/login`,
+        {
+          email: email.value,
+          password: password.value,
+        })
+    const token = response.data.access_token
+    console.log(token)
   }
-};
+  catch(error) {
+    console.log(error)
+    throw error
+  }
+}
 </script>
 
 <style scoped>
@@ -173,3 +131,32 @@ const handleSubmit = async () => {
   }
 }
 </style>
+
+<!--<style scoped>-->
+<!--header {-->
+<!--  line-height: 1.5;-->
+<!--}-->
+
+<!--.logo {-->
+<!--  display: block;-->
+<!--  margin: 0 auto 2rem;-->
+<!--}-->
+
+<!--@media (min-width: 1024px) {-->
+<!--  header {-->
+<!--    display: flex;-->
+<!--    place-items: center;-->
+<!--    padding-right: calc(var(&#45;&#45;section-gap) / 2);-->
+<!--  }-->
+
+<!--  .logo {-->
+<!--    margin: 0 2rem 0 0;-->
+<!--  }-->
+
+<!--  header .wrapper {-->
+<!--    display: flex;-->
+<!--    place-items: flex-start;-->
+<!--    flex-wrap: wrap;-->
+<!--  }-->
+<!--}-->
+<!--</style>-->

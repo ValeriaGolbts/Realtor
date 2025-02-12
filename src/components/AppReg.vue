@@ -1,95 +1,99 @@
 <template>
   <section class="wrap registration">
     <p>Регистрация</p>
-    <form @submit.prevent="handleSubmit">
+    <div>
       <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        v-model="formData.email"
-        required
+          type="text"
+          name="name"
+          placeholder="Имя"
+          v-model="name"
+          required
       />
-      <p v-if="errorEmail" class="error">{{ errorEmail }}</p>
+<!--      <p v-if="errorEmail" class="error">{{ errorEmail }}</p>-->
       <input
-        type="password"
-        name="password"
-        placeholder="Пароль"
-        v-model="formData.password"
-        required
+          type="text"
+          name="surname"
+          placeholder="Фамилия"
+          v-model="surname"
+          required
       />
-      <p v-if="errorPassword" class="error">{{ errorPassword }}</p>
-      <button type="submit">Зарегистрироваться</button>
-    </form>
-    <p v-if="errorUser" class="error">{{ errorUser }}</p>
+      <input
+          type="text"
+          name="patronymic"
+          placeholder="Отчество"
+          v-model="patronymic"
+          required
+      />
+      <input
+          type="text"
+          name="phone"
+          placeholder="Номер телефона"
+          v-model="phone"
+          required
+      />
+      <input
+          type="email"
+          name="email"
+          placeholder="Электронная почта"
+          v-model="email"
+          required
+      />
+      <input
+          type="password"
+          name="password"
+          placeholder="Пароль"
+          v-model="password"
+          required
+      />
+      <input
+          type="text"
+          name="verification_code"
+          placeholder="Код"
+          v-model="verification_code"
+          required
+      />
+<!--      <p v-if="errorPassword" class="error">{{ errorPassword }}</p>-->
+      <input type="submit" @click.prevent="signUp" />
+    </div>
+<!--    <p v-if="errorUser" class="error">{{ errorUser }}</p>-->
   </section>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/userStore';
+import axios from "axios";
+import {thisUrl} from "../url.js";
+import {ref} from "vue";
 
-const errorUser = ref('');
-const errorEmail = ref('');
-const errorPassword = ref('');
-const formData = ref({
-  email: '',
-  password: '',
-});
-const router = useRouter();
-const userStore = useUserStore();
+let email = ref('')
+let password = ref('')
+let name = ref('')
+let surname = ref('')
+let phone = ref('')
+let patronymic = ref('')
+let verification_code = ref('')
 
-const validateEmail = (email) => {
-  const re = /^[A-z0-9._%+-]+@[A-z0-9.-]+\.[A-z]{2,}$/;
-  return re.test(email);
-};
-
-const handleSubmit = async () => {
-  errorEmail.value = '';
-  errorPassword.value = '';
-
-  if (!validateEmail(formData.value.email)) {
-    errorEmail.value = 'Введите корректный email. Пример: user@example.com';
-    return;
-  }
-
-  if (formData.value.password.length < 6) {
-    errorPassword.value = 'Пароль должен содержать минимум 6 символов.';
-    return;
-  }
-
+const signUp = async () => {
   try {
-    const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyB9Cx6vMAu9DgAY4Ey2R199ZEc-IjXeQGM`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: formData.value.email,
-        password: formData.value.password,
-        returnSecureToken: true,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error.message);
-    }
-
-    const data = await response.json();
-    userStore.setUser(data);
-    router.push('/auth');
-  } catch (error) {
-    if (error.message.includes('EMAIL_EXISTS')) {
-      errorEmail.value = 'Этот email уже зарегистрирован.';
-      errorUser.value = '';
-    } else {
-      errorUser.value = error.message;
-      console.error('Ошибка:', error.message);
-    }
+    const response = await axios.post(
+        `${thisUrl()}/reg`, {
+          name: name.value,
+          surname: surname.value,
+          patronymic: patronymic.value,
+          phone: phone.value,
+          email: email.value,
+          password: password.value,
+          verification_code: verification_code.value
+        }
+    );
+console.log(name.value, surname.value, patronymic.value, phone.value, email.value, password.value,)
   }
-};
+  catch(error) {
+    console.log(error)
+    throw error
+  }
+}
 </script>
+
 
 <style scoped>
 .wrap.registration {
