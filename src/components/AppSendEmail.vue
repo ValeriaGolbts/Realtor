@@ -22,6 +22,7 @@ import {thisUrl} from "../url.js";
 import {ref} from "vue";
 import {useRouter} from 'vue-router'
 const router = useRouter()
+
 let email = ref('')
 
 const sendEmail = async () => {

@@ -6,7 +6,7 @@ import AppSendEmail from '../components/AppSendEmail.vue'
 const routes = [
   {
     path: '/',
-    component: () => import('../App.vue'), // Динамическая загрузка
+    component: () => import('../App.vue'),
   },
   {
     path: '/reg',
