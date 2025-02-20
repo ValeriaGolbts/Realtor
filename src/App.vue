@@ -1,5 +1,6 @@
 <template>
 <main>
+  <AppHeader></AppHeader>
   <AppMainPage></AppMainPage>
 </main>
 </template>
@@ -12,6 +13,8 @@ import AppAuth from "@/components/AppAuth.vue"
 import AppReg from "@/components/AppReg.vue";
 import AppSendEmail from "@/components/AppSendEmail.vue";
 import AppMainPage from "@/components/AppMainPage.vue";
+import AppHeader from "@/components/AppHeader.vue";
+import AppFooter from "@/components/AppFooter.vue";
 
 
 
