@@ -2,6 +2,7 @@
 <main>
   <AppHeader></AppHeader>
   <AppMainPage></AppMainPage>
+  <AppFooter></AppFooter>
 </main>
 </template>
 
