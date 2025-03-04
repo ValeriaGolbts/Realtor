@@ -56,7 +56,7 @@
 <script setup>
 
 </script>
-<style>
+<style scoped>
 header{
   display: flex;
   flex-direction: row;
