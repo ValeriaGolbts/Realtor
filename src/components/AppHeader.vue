@@ -94,7 +94,6 @@ section{
   color: black;
 }
 .links{
-  width: 21%;
   display: flex;
   justify-content: space-between;
   color: black;
