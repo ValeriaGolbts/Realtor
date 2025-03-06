@@ -1,10 +1,12 @@
 <template>
+  <AppHeader />
 <main>
-  <AppHeader></AppHeader>
-  <AppMainPage></AppMainPage>
 
-  <AppFooter></AppFooter>
+  <router-view>
+
+  </router-view>
 </main>
+  <AppFooter />
 </template>
 
 <script setup>
@@ -17,6 +19,7 @@ import AppSendEmail from "@/components/AppSendEmail.vue";
 import AppMainPage from "@/components/AppMainPage.vue";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
+import AppTest from "@/components/AppTest.vue";
 
 
 

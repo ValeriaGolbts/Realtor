@@ -6,7 +6,7 @@ import AppSendEmail from '../components/AppSendEmail.vue'
 const routes = [
   {
     path: '/',
-    component: () => import('../App.vue'),
+    component: () => import('../components/AppMainPage.vue'),
   },
   {
     path: '/reg',
@@ -17,6 +17,13 @@ const routes = [
     path: '/email',
     component: () => import('../components/AppSendEmail.vue'),
   },
+
+  {
+    path: '/view',
+    component: () => import('../components/AppTest.vue'),
+    name: 'view'
+  },
+
 ];
 
 const router = createRouter({
