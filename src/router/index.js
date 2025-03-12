@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import App from '../App.vue'
 import AppReg from '../components/AppReg.vue'
 import AppSendEmail from '../components/AppSendEmail.vue'
+import AppSearchFilters from '../components/AppSearchFilters.vue'
 
 const routes = [
   {
@@ -20,8 +21,13 @@ const routes = [
 
   {
     path: '/view',
+    name: 'view',
     component: () => import('../components/AppTest.vue'),
-    name: 'view'
+  },
+  {
+    path: '/filters-search',
+    name: 'filters',
+    component: () => import('../components/AppSearchFilters.vue'),
   },
 
 ];

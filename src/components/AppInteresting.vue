@@ -62,7 +62,7 @@ body {
 
 .black-main {
   background-color: rgb(17, 17, 17);
-  width: 100%;
+  background-image: none;
 }
 
 .wrapper {

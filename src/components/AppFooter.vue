@@ -1,4 +1,5 @@
 <template>
+  <section>
   <div class="img_footer">
     <div>
       <img src="./icons/TOMSK.svg">
@@ -22,17 +23,26 @@
     </div>
     <div class="idk">© 2011—2025 TomskZone</div>
   </div>
+  </section>
 </template>
 
 <script setup>
 
 </script>
 
-<style>
+<style scoped>
+
+section{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(17, 17, 17, 1);
+  justify-content: space-between;
+}
 .img_footer{
   margin-left: 160px;
   margin-right: 160px;
-  background-color: black;
+  background-color: rgba(17, 17, 17, 1);
 }
 .footer{
   margin-left: 160px;
@@ -43,6 +53,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  margin-bottom: 1%;
+  border-radius: 5px;
 }
 .nav{
   display: flex;

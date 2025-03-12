@@ -1,5 +1,40 @@
 <template>
   <main>
+    <section class="head_main">
+    <div class="decription">
+      <div class="decription1">
+        <div>Найдите жилье</div>
+        <div>для новой поездки в Томске</div>
+      </div>
+      <div>
+        <img src="./icons/TOMSKZONE.svg">
+      </div>
+      <div class="decription2">
+        <div>Ищите спецпредложения </div>
+        <div>на квартиры, дома и другие варианты</div>
+      </div>
+    </div>
+    <div class="filter-container">
+      <div class="filter">
+        <select name="type">
+          <option value="">Вид</option>
+          <option value="apartment">Квартира</option>
+          <option value="house">Дом</option>
+        </select>
+        <div class="border"></div>
+        <select name="rooms">
+          <option value="">Кол-во комнат</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+        </select>
+        <div class="border"></div>
+        <input type="text" name="price" placeholder="Цена до, ₽ в месяц">
+        <div class="border"></div>
+        <input type="text" name="address" placeholder="Адрес, район, улица">
+      </div>
+      <button>НАЙТИ</button>
+    </div>
+    </section>
     <div class="main">
       <p>ОСОБЕННОСТИ СЕРВИСА</p>
       <p class="text">Создаём безопасный, прозрачный <br>
@@ -113,7 +148,7 @@ import shape from "@/assets/shape.png"
 import fullShape from "@/assets/full_shape.png"
 import AppInteresting from "@/components/AppInteresting.vue"
 import AppLastViews from "@/components/AppLastViews.vue"
-
+import AppHeader from "@/components/AppHeader.vue";
 import {ref} from 'vue';
 
 const listings = ref([
@@ -180,19 +215,117 @@ function toggleFavorite(index) {
 
 </script>
 
-<style>
+<style scoped>
 body {
   margin: 0;
 }
+.head_main{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 760px;
+  background-image: url("./icons/Banner_main (1).svg");
+  justify-content: space-between;
+}
+.decription{
+  margin-right: 160px;
+  margin-left: 160px;
+}
+.decription1{
+  color: white;
+  font-size: 24px;
+}
+.decription2{
+  display: flex
+;
+  flex-direction: column;
+  color: white;
+  flex-wrap: wrap;
+  align-content: center;
+  font-size: 24px;
+  margin-left: 123px;
+}
+.filter-container {
+  display: flex;
+  gap: 5px;
+  padding: 10px;
+  justify-content: center;
+  margin-bottom: 44px;
+}
 
+.filter-container select,
+.filter-container input {
+  padding: 8px 10px;
+  border: 1px solid #555;
+  border-radius: 3px;
+  font-size: 16px;
+  color: #ddd;
+  background-color: #333;
+  flex: 1;
+}
+
+.filter-container button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter>select {
+  background-color: white;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("./icons/Vector.svg");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  padding-right: 30px;
+  color: #181818;
+  border: none;
+  transition: none;
+}
+
+.filter select:nth-child(1){
+  width: 74px;
+}
+.filter select:nth-child(2){
+  width: 156px;
+}
+.filter input:nth-child(1){
+  width: 186px;
+}
+.border{
+  margin-top: 5px;
+  border-right: 1px solid red;
+  height: 23px;
+}
+
+
+.filter-container select:invalid {
+  color: #999;
+}
+.filter{
+  display: flex;
+  background-color: white;
+  border-radius: 5px;
+  width: 726px;
+}
+.filter>input{
+  border: none;
+  background-color: white;
+}
 main {
   background-color: rgba(242, 238, 235, 1);
-  width: 1920px;
+  width: 100%;
 }
 
 .main {
   margin-right: 160px;
   margin-left: 160px;
+  margin-top: 128px;
 }
 
 .main:nth-child(1) {
