@@ -230,6 +230,7 @@ body {
 .decription{
   margin-right: 160px;
   margin-left: 160px;
+  margin-top: 15%;
 }
 .decription1{
   color: white;
