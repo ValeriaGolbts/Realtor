@@ -3,7 +3,7 @@
     <div class="content-container">
       <div class="title">Долгосрочная аренда 1-комн <br> и 2-комн квартир</div>
       <div class="adv">
-        <span class="label">{{ itemCount }} ОБЪЯВЛЕНИЯ</span>
+        <span class="label">{{ filteredListings.length }} ОБЪЯВЛЕНИЯ</span>
       </div>
       <div class="search-and-sort">
         <input
@@ -32,11 +32,11 @@
               <label>Тип аренды</label>
               <div class="rent-type-buttons">
                 <button
-                    :class="{ active: filters.rentType === 'longTerm' }"
+                    :class="{ active: filters.type_rent_id === 'longTerm' }"
                     @click="setRentType('longTerm')"
                 >Долгосрочная</button>
                 <button
-                    :class="{ active: filters.rentType === 'shortTerm' }"
+                    :class="{ active: filters.type_rent_id === 'shortTerm' }"
                     @click="setRentType('shortTerm')"
                 >Посуточная</button>
               </div>
@@ -48,10 +48,10 @@
                 <button
                     v-for="type in propertyTypes"
                     :key="type.id"
-                    :class="{ active: filters.propertyType === type.id }"
+                    :class="{ active: filters.type_realty_id === type.id }"
                     @click="selectPropertyType(type.id)"
                     class="property-type-item"
-                >{{ type.name }}</button>
+                >{{ type.title }}</button>
               </div>
             </div>
 
@@ -65,7 +65,7 @@
                         type="range"
                         :min="priceRange.min"
                         :max="priceRange.max"
-                        v-model.number="filters.minPrice"
+                        v-model.number="filters.price_min"
                         @input="updateRange"
                         class="slider-input min"
                     />
@@ -73,7 +73,7 @@
                         type="range"
                         :min="priceRange.min"
                         :max="priceRange.max"
-                        v-model.number="filters.maxPrice"
+                        v-model.number="filters.price_max"
                         @input="updateRange"
                         class="slider-input max"
                     />
@@ -83,14 +83,14 @@
                   <input
                       class="input"
                       type="number"
-                      v-model.number="filters.minPrice"
+                      v-model.number="filters.price_min"
                       placeholder="От"
                       @input="updateRange"
                   />
                   <input
                       class="input"
                       type="number"
-                      v-model.number="filters.maxPrice"
+                      v-model.number="filters.price_max"
                       placeholder="До"
                       @input="updateRange"
                   />
@@ -104,7 +104,7 @@
                 <button
                     v-for="room in availableRooms"
                     :key="room.id"
-                    :class="{ active: filters.rooms.includes(room.id) }"
+                    :class="{ active: filters.count_rooms.includes(room.id) }"
                     @click="toggleRoom(room.id)"
                     class="room-item"
                 >{{ room.name }}</button>
@@ -118,7 +118,7 @@
                   <input
                       class="input"
                       type="number"
-                      v-model.number="filters.minTotalArea"
+                      v-model.number="filters.total_square_min"
                       placeholder="От"
                   />
                   <span class="area-unit">м²</span>
@@ -127,7 +127,7 @@
                   <input
                       class="input"
                       type="number"
-                      v-model.number="filters.maxTotalArea"
+                      v-model.number="filters.total_square_max"
                       placeholder="До"
                   />
                   <span class="area-unit">м²</span>
@@ -142,7 +142,7 @@
                   <input
                       class="input"
                       type="number"
-                      v-model.number="filters.minLivingArea"
+                      v-model.number="filters.living_square_min"
                       placeholder="От"
                   />
                   <span class="area-unit">м²</span>
@@ -151,7 +151,7 @@
                   <input
                       class="input"
                       type="number"
-                      v-model.number="filters.maxLivingArea"
+                      v-model.number="filters.living_square_max"
                       placeholder="До"
                   />
                   <span class="area-unit">м²</span>
@@ -165,13 +165,13 @@
                 <input
                     class="input"
                     type="number"
-                    v-model.number="filters.minFloor"
+                    v-model.number="filters.floor_min"
                     placeholder="От"
                 />
                 <input
                     class="input"
                     type="number"
-                    v-model.number="filters.maxFloor"
+                    v-model.number="filters.floor_max"
                     placeholder="До"
                 />
               </div>
@@ -183,75 +183,24 @@
                 <button
                     v-for="type in renovationTypes"
                     :key="type.id"
-                    :class="{ active: filters.renovationType === type.id }"
+                    :class="{ active: filters.repair_id === type.id }"
                     @click="selectRenovationType(type.id)"
                     class="renovation-type-item"
-                >{{ type.name }}</button>
+                >{{ type.title }}</button>
               </div>
             </div>
 
             <button class="apply-filters-btn" @click="applyFilters">
-              Загрузить ещё
-            </button>
-          </div>
-          <!-- Пагинация -->
-          <div class="pagination">
-            <!-- Кнопка "Назад" -->
-            <button
-                :disabled="currentPage === 1"
-                @click="changePage(currentPage - 1)"
-                class="pagination-button"
-            >
-              <img
-                  src="./icons/Arrow-left.svg"
-                  alt="Назад"
-                  class="arrow-icon"
-                  :class="{ disabled: currentPage === 1 }"
-              />
-            </button>
-
-            <!-- Номера страниц -->
-            <div class="page-numbers">
-              <button
-                  v-for="page in visiblePages"
-                  :key="page"
-                  :class="{ active: page === currentPage }"
-                  @click="changePage(page)"
-                  class="page-number"
-              >
-                {{ page }}
-              </button>
-              <span class="dots" v-if="showEllipsisAfter">...</span>
-              <button
-                  v-if="showLastPage"
-                  @click="changePage(totalPages)"
-                  class="page-number"
-              >
-                {{ totalPages }}
-              </button>
-            </div>
-
-            <!-- Кнопка "Вперед" -->
-            <button
-                :disabled="currentPage === totalPages"
-                @click="changePage(currentPage + 1)"
-                class="pagination-button"
-            >
-              <img
-                  src="./icons/Arrow-right.svg"
-                  alt="Вперед"
-                  class="arrow-icon"
-                  :class="{ disabled: currentPage === totalPages }"
-              />
+              Применить
             </button>
           </div>
         </div>
 
-        <!-- Список объявлений -->
+        <!-- Объявления -->
         <div class="listings-container">
-          <template v-if="listings.length > 0">
+          <template v-if="filteredListings.length > 0">
             <div
-                v-for="(listing, index) in listings"
+                v-for="(listing, index) in paginatedListings"
                 :key="index"
                 class="listing"
             >
@@ -291,276 +240,305 @@
           </template>
         </div>
       </div>
+
+      <!-- Пагинация -->
+      <div class="pagination">
+        <!-- Кнопка "Назад" -->
+        <button
+            :disabled="currentPage === 1"
+            @click="changePage(currentPage - 1)"
+            class="pagination-button"
+        >
+          <img
+              src="./icons/Arrow-left.svg"
+              alt="Назад"
+              class="arrow-icon"
+              :class="{ disabled: currentPage === 1 }"
+          />
+        </button>
+
+        <!-- Номера страниц -->
+        <div class="page-numbers">
+          <button
+              v-for="page in visiblePages"
+              :key="page"
+              :class="{ active: page === currentPage }"
+              @click="changePage(page)"
+              class="page-number"
+          >
+            {{ page }}
+          </button>
+          <span class="dots" v-if="showEllipsisAfter">...</span>
+          <button
+              v-if="showLastPage"
+              @click="changePage(totalPages)"
+              class="page-number"
+          >
+            {{ totalPages }}
+          </button>
+        </div>
+
+        <!-- Кнопка "Вперед" -->
+        <button
+            :disabled="currentPage === totalPages"
+            @click="changePage(currentPage + 1)"
+            class="pagination-button"
+        >
+          <img
+              src="./icons/Arrow-right.svg"
+              alt="Вперед"
+              class="arrow-icon"
+              :class="{ disabled: currentPage === totalPages }"
+          />
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from 'vue';
+<script>
 import axios from 'axios';
+import { ref, computed, onMounted } from 'vue';
+import { thisUrl } from "../url.js";
 
-const itemCount = ref(0);
-const priceRange = ref({ min: 5000, max: 1000000 });
-const searchQuery = ref('');
-const sortOrder = ref('asc'); // 'asc' или 'desc'
+export default {
+  setup() {
+    const listings = ref([]);
+    const rentTypes = ref([
+      { id: 'longTerm', name: 'Долгосрочная' },
+      { id: 'shortTerm', name: 'Посуточная' }
+    ]);
+    const propertyTypes = ref([]);
+    const renovationTypes = ref([]);
+    const searchQuery = ref('');
+    const sortOrder = ref('asc');
+    const filters = ref({
+      type_rent_id: null,
+      type_realty_id: null,
+      price_min: 0,
+      price_max: 100000,
+      count_rooms: [],
+      total_square_min: null,
+      total_square_max: null,
+      living_square_min: null,
+      living_square_max: null,
+      floor_min: null,
+      floor_max: null,
+      repair_id: null,
+    });
+    const priceRange = ref({
+      min: 0,
+      max: 100000,
+    });
+    const availableRooms = ref([
+      { id: 'студия', name: 'студия' },
+      { id: '1', name: '1' },
+      { id: '2', name: '2' },
+      { id: '3', name: '3' },
+      { id: '4', name: '4' },
+      { id: '5', name: '5' },
+      { id: '6+', name: '6+' },
+      { id: 'свободная планировка', name: 'свободная планировка' }
+    ]);
+    const currentPage = ref(1);
+    const itemsPerPage = ref(10);
+    const loading = ref(false);
+    const error = ref(null);
 
-const filters = ref({
-  rentType: null,
-  propertyType: null,
-  minPrice: 5000,
-  maxPrice: 1000000,
-  rooms: [],
-  minTotalArea: null,
-  maxTotalArea: null,
-  minLivingArea: null,
-  maxLivingArea: null,
-  minFloor: null,
-  maxFloor: null,
-  renovationType: null,
-});
+    const filteredListings = computed(() => {
+      let filtered = listings.value;
 
-const propertyTypes = ref([]);
-const renovationTypes = ref([]);
-const roomsByPropertyType = ref({});
-const currentPage = ref(1);
-const totalPages = ref(20); // Заменить на динамическое значение
-const maxVisiblePages = ref(5);
-const listings = ref([
-  {
-    image: './icons/Photo.svg',
-    price: '20 000',
-    oldPrice: '21 000',
-    details: '1 комн. 35 м2 15/16 эт.',
-    complex: 'ЖК "Меркурий Таур"',
-    address: 'улица Энергетическая, 13А, Томск, Томская область',
-    isFavorited: false,
+      // Search filter
+      if (searchQuery.value) {
+        filtered = filtered.filter(listing =>
+            listing.address.toLowerCase().includes(searchQuery.value.toLowerCase())
+        );
+      }
+
+      // Rent Type filter
+      if (filters.value.type_rent_id) {
+        filtered = filtered.filter(listing => listing.type_rent === filters.value.type_rent_id);
+      }
+
+      // Property Type filter
+      if (filters.value.type_realty_id) {
+        filtered = filtered.filter(listing => listing.type_realty === filters.value.type_realty_id);
+      }
+
+      // Price filter
+      filtered = filtered.filter(
+          listing => listing.price >= filters.value.price_min && listing.price <= filters.value.price_max
+      );
+
+      // Rooms filter
+      if (filters.value.count_rooms.length > 0) {
+        filtered = filtered.filter(listing => filters.value.count_rooms.includes(listing.count_rooms));
+      }
+
+      // Total Area filter
+      if (filters.value.total_square_min) {
+        filtered = filtered.filter(listing => listing.total_square >= filters.value.total_square_min);
+      }
+      if (filters.value.total_square_max) {
+        filtered = filtered.filter(listing => listing.total_square <= filters.value.total_square_max);
+      }
+
+      // Living Area filter
+      if (filters.value.living_square_min) {
+        filtered = filtered.filter(listing => listing.living_square >= filters.value.living_square_min);
+      }
+      if (filters.value.living_square_max) {
+        filtered = filtered.filter(listing => listing.living_square <= filters.value.living_square_max);
+      }
+
+      // Floor filter
+      if (filters.value.floor_min) {
+        filtered = filtered.filter(listing => listing.floor >= filters.value.floor_min);
+      }
+      if (filters.value.floor_max) {
+        filtered = filtered.filter(listing => listing.floor <= filters.value.floor_max);
+      }
+
+      // Renovation Type filter
+      if (filters.value.repair_id) {
+        filtered = filtered.filter(listing => listing.repair_id === filters.value.repair_id);
+      }
+
+      return filtered;
+    });
+
+    const paginatedListings = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage.value;
+      const end = start + itemsPerPage.value;
+      return filteredListings.value.slice(start, end);
+    });
+
+    const totalPages = computed(() => {
+      return Math.ceil(filteredListings.value.length / itemsPerPage.value);
+    });
+
+    const sliderTrackStyle = computed(() => {
+      const minPercentage = ((filters.value.price_min - priceRange.value.min) / (priceRange.value.max - priceRange.value.min)) * 100;
+      const maxPercentage = ((filters.value.price_max - priceRange.value.min) / (priceRange.value.max - priceRange.value.min)) * 100;
+      return {
+        left: `${minPercentage}%`,
+        width: `${maxPercentage - minPercentage}%`,
+      };
+    });
+
+    const itemCount = computed(() => filteredListings.value.length);
+
+    const fetchData = async () => {
+      loading.value = true;
+      error.value = null;
+      try {
+        const [listingsResponse, filterResponse] = await Promise.all([
+          axios.get(`${thisUrl()}/index`),
+          axios.get(`${thisUrl()}/realty/filter`),
+        ]);
+
+        listings.value = listingsResponse.data;
+        propertyTypes.value = filterResponse.data.propertyTypes;
+        renovationTypes.value = filterResponse.data.renovationTypes;
+
+        console.log('listings:', listings.value);
+        console.log('propertyTypes:', propertyTypes.value);
+        console.log('renovationTypes', renovationTypes.value)
+      } catch (err) {
+        console.error(err);
+        error.value = 'Failed to fetch data.';
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const applyFilters = () => {
+      currentPage.value = 1; // Сброс пагинации при применении фильтров
+    };
+
+    const resetFilters = () => {
+      filters.value = {
+        type_rent_id: null,
+        type_realty_id: null,
+        price_min: 0,
+        price_max: 100000,
+        count_rooms: [],
+        total_square_min: null,
+        total_square_max: null,
+        living_square_min: null,
+        living_square_max: null,
+        floor_min: null,
+        floor_max: null,
+        repair_id: null,
+      };
+      applyFilters();
+    };
+
+    const setRentType = (type) => {
+      filters.value.type_rent_id = type;
+    };
+
+    const selectPropertyType = (typeId) => {
+      filters.value.type_realty_id = typeId;
+    };
+
+    const toggleRoom = (roomId) => {
+      if (filters.value.count_rooms.includes(roomId)) {
+        filters.value.count_rooms = filters.value.count_rooms.filter(id => id !== roomId);
+      } else {
+        filters.value.count_rooms.push(roomId);
+      }
+    };
+
+    const selectRenovationType = (typeId) => {
+      filters.value.repair_id = typeId;
+    };
+
+    const updateRange = () => {
+      // You might want to add some validation here to prevent min > max
+    };
+
+    const toggleSortOrder = () => {
+      sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+    };
+
+    const changePage = (page) => {
+      currentPage.value = page;
+    };
+
+    onMounted(fetchData);
+
+    return {
+      listings,
+      rentTypes,
+      propertyTypes,
+      renovationTypes,
+      searchQuery,
+      sortOrder,
+      filters,
+      priceRange,
+      availableRooms,
+      currentPage,
+      itemsPerPage,
+      loading,
+      error,
+      filteredListings,
+      paginatedListings,
+      totalPages,
+      sliderTrackStyle,
+      itemCount,
+      fetchData,
+      applyFilters,
+      resetFilters,
+      setRentType,
+      selectPropertyType,
+      toggleRoom,
+      selectRenovationType,
+      updateRange,
+      toggleSortOrder,
+      changePage,
+    };
   },
-  {
-    image: './icons/Photo.svg',
-    price: '20 000',
-    oldPrice: '',
-    details: '1 комн. 35 м2 15/16 эт.',
-    complex: 'ЖК "Меркурий Таур"',
-    address: 'улица Энергетическая, 13А, Томск, Томская область',
-    isFavorited: false,
-  },
-  {
-    image: './icons/Photo.svg',
-    price: '20 000',
-    oldPrice: '21 000',
-    details: '1 комн. 35 м2 15/16 эт.',
-    complex: 'ЖК "Меркурий Таур"',
-    address: 'улица Энергетическая, 13А, Томск, Томская область',
-    isFavorited: false,
-  },
-
-  {
-    image: './icons/Photo.svg',
-    price: '20 000',
-    oldPrice: '',
-    details: '1 комн. 35 м2 15/16 эт.',
-    complex: 'ЖК "Меркурий Таур"',
-    address: 'улица Энергетическая, 13А, Томск, Томская область',
-    isFavorited: false,
-  },
-  {
-    image: './icons/Photo.svg',
-    price: '20 000',
-    oldPrice: '21 000',
-    details: '1 комн. 35 м2 15/16 эт.',
-    complex: 'ЖК "Меркурий Таур"',
-    address: 'улица Энергетическая, 13А, Томск, Томская область',
-    isFavorited: false,
-  },
-  {
-    image: './icons/Photo.svg',
-    price: '20 000',
-    oldPrice: '21 000',
-    details: '1 комн. 35 м2 15/16 эт.',
-    complex: 'ЖК "Меркурий Таур"',
-    address: 'улица Энергетическая, 13А, Томск, Томская область',
-    isFavorited: false,
-  },
-  {
-    image: './icons/Photo.svg',
-    price: '20 000',
-    oldPrice: '21 000',
-    details: '1 комн. 35 м2 15/16 эт.',
-    complex: 'ЖК "Меркурий Таур"',
-    address: 'улица Энергетическая, 13А, Томск, Томская область',
-    isFavorited: false,
-  },
-  {
-    image: '/icons/Photo.svg',
-    price: '20 000',
-    oldPrice: '21 000',
-    details: '1 комн. 35 м2 15/16 эт.',
-    complex: 'ЖК "Меркурий Таур"',
-    address: 'улица Энергетическая, 13А, Томск, Томская область',
-    isFavorited: false,
-  },
-]);
-// Данные объявлений
-// const listings = ref([]);
-const fullShape = '/path/to/full-heart-icon.svg';
-const shape = '/path/to/empty-heart-icon.svg';
-
-const visiblePages = computed(() => {
-  const pages = [];
-  const startPage = Math.max(1, currentPage.value - Math.floor(maxVisiblePages.value / 2));
-  const endPage = Math.min(totalPages.value, startPage + maxVisiblePages.value - 1);
-
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(i);
-  }
-  return pages;
-});
-
-const showEllipsisAfter = computed(() => {
-  return visiblePages.value[visiblePages.value.length - 1] < totalPages.value - 1;
-});
-
-const showLastPage = computed(() => {
-  return visiblePages.value[visiblePages.value.length - 1] < totalPages.value;
-});
-
-// Метод для изменения страницы
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    fetchData(page);
-  }
-};
-
-const fetchData = async (page) => {
-  try {
-    const response = await axios.get(
-        `https://api.example.com/items?page=${page}&search=${searchQuery.value}&sort=${sortOrder.value}`
-    );
-    listings.value = response.data.listings;
-    console.log('Данные страницы:', response.data);
-  } catch (error) {
-    console.error('Ошибка при получении данных:', error);
-  }
-};
-const searchListings = () => {
-  // TODO: Реализовать логику поиска здесь
-  console.log('Выполняется поиск по запросу:', searchQuery.value);
-  // потребуется отфильтровать данные на основе searchQuery.value
-  // И обновить массив listings
-};
-
-const toggleSortOrder = () => {
-  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-  // TODO: Реализуйте логику сортировки здесь
-  console.log('Изменение порядка сортировки на:', sortOrder.value);
-  // потребуется отсортировать массив listings на основе sortOrder.value
-};
-onMounted(() => {
-  fetchData(currentPage.value);
-});
-
-const fetchInitialData = async () => {
-  try {
-    const response = await axios.get('https://api.example.com/initial-data');
-    propertyTypes.value = response.data.propertyTypes;
-    renovationTypes.value = response.data.renovationTypes;
-    roomsByPropertyType.value = response.data.roomsByPropertyType;
-    itemCount.value = response.data.itemCount;
-    priceRange.value = response.data.priceRange;
-  } catch (error) {
-    console.error('Ошибка при получении начальных данных:', error);
-  }
-};
-
-onMounted(fetchInitialData);
-
-const availableRooms = computed(() => {
-  return filters.value.propertyType
-      ? roomsByPropertyType.value[filters.value.propertyType] || []
-      : [];
-});
-
-const sliderTrackStyle = computed(() => {
-  const minPercentage =
-      ((filters.value.minPrice - priceRange.value.min) /
-          (priceRange.value.max - priceRange.value.min)) *
-      100;
-  const maxPercentage =
-      ((filters.value.maxPrice - priceRange.value.min) /
-          (priceRange.value.max - priceRange.value.min)) *
-      100;
-
-  return {
-    left: `${minPercentage}%`,
-    width: `${maxPercentage - minPercentage}%`,
-  };
-});
-
-const setRentType = (type) => {
-  filters.value.rentType = type;
-};
-
-const selectPropertyType = (typeId) => {
-  filters.value.propertyType = typeId;
-  filters.value.rooms = [];
-};
-
-const toggleRoom = (roomId) => {
-  const index = filters.value.rooms.indexOf(roomId);
-  if (index > -1) {
-    filters.value.rooms.splice(index, 1);
-  } else {
-    filters.value.rooms.push(roomId);
-  }
-};
-
-const selectRenovationType = (typeId) => {
-  filters.value.renovationType = typeId;
-};
-
-const updateRange = () => {
-  if (filters.value.minPrice > filters.value.maxPrice) {
-    [filters.value.minPrice, filters.value.maxPrice] = [
-      filters.value.maxPrice,
-      filters.value.minPrice,
-    ];
-  }
-};
-
-const resetFilters = () => {
-  Object.assign(filters.value, {
-    rentType: null,
-    propertyType: null,
-    minPrice: priceRange.value.min,
-    maxPrice: priceRange.value.max,
-    rooms: [],
-    minTotalArea: null,
-    maxTotalArea: null,
-    minLivingArea: null,
-    maxLivingArea: null,
-    minFloor: null,
-    maxFloor: null,
-    renovationType: null,
-  });
-};
-
-const applyFilters = async () => {
-  try {
-    const response = await axios.post(
-        'https://api.example.com/apply-filters',
-        filters.value
-    );
-    itemCount.value = response.data.itemCount;
-    listings.value = response.data.listings;
-  } catch (error) {
-    console.error('Ошибка при применении фильтров:', error);
-  }
-};
-
-// Функция для переключения избранного
-const toggleFavorite = (index) => {
-  listings.value[index].isFavorited = !listings.value[index].isFavorited;
 };
 </script>
 
@@ -705,7 +683,7 @@ button {
 .pagination-button{
   width: 21%;
   height: 90%;
-padding: 0px 0px;
+  padding: 0px 0px;
 }
 .page-numbers{
   display: flex;

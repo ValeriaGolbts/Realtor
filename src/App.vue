@@ -3,7 +3,7 @@
 <main>
   <router-view></router-view>
 </main>
-  <AppFooter v-if="showFooter" />
+  <AppFooter v-if="showFooter" :class="{ 'custom-footer': isCustomFooter }" />
 </template>
 
 <script setup>
@@ -18,7 +18,7 @@ const route = useRoute();
 const headerBackground = ref('');
 const showFooter = ref(true);
 const isCustomHeader = ref(false);
-
+const isCustomFooter = ref( false)
 watch(route, (newRoute) => {
   if (newRoute.path === '/filters-search') {
     headerBackground.value = 'black';
@@ -26,8 +26,10 @@ watch(route, (newRoute) => {
     showFooter.value = newRoute.path !== '/filters-search';
   } else if (newRoute.path === '/') {
     isCustomHeader.value = true;
-  } else {
-    headerBackground.value = 'red'; // Пример цвета для других страниц
+  } else if(newRoute.path ==='/create_announ'){
+    headerBackground.value = 'white';
+    isCustomHeader.value = true;
+    isCustomFooter.value = true;
   }
 }, { immediate: true });
 watch(route, (newRoute) => {
@@ -42,6 +44,9 @@ watch(route, (newRoute) => {
   position: absolute;
   left: -2%;
 }
+/*.custom-footer {*/
+/*  background-color: white;*/
+/*}*/
 body{
   margin: 0;
 }

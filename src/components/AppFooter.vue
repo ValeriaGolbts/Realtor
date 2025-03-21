@@ -42,7 +42,6 @@ section{
 .img_footer{
   margin-left: 160px;
   margin-right: 160px;
-  background-color: rgba(17, 17, 17, 1);
 }
 .footer{
   margin-left: 160px;
