@@ -13,21 +13,81 @@
         <router-link class="router-link" to="/filters-search">Недвижимость посуточно</router-link>
       </div>
       <div class="authreg">
-        <button>ВОЙТИ</button>
-        <button>ЗАРЕГИСТРИРОВАТЬСЯ</button>
+        <!-- Условный рендеринг в зависимости от состояния авторизации -->
+        <div v-if="!isAuthenticated" class="auth-buttons">
+          <button @click="openModalAuthentication">ВОЙТИ</button>
+          <button @click="openModalRegistration">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+        </div>
+        <div v-else class="user-menu">
+          <button class="create-ad">Создать объявление</button>
+          <img src="@/assets/shape_black.svg" alt="Избранное" class="icon">
+          <img src="@/assets/avatar.png" alt="Аватар" class="avatar" @click="logout">
+        </div>
       </div>
+      <Registration
+          v-model:isOpen="isModalOpenReg"
+          @go-to-login="switchToAuthModal"
+          @auth-success="handleAuthSuccess"
+      />
+      <Authentication
+          v-model:isOpen="isModalOpenAuth"
+          @go-to-register="switchToRegModal"
+          @auth-success="handleAuthSuccess"
+      />
     </header>
   </template>
 <script setup>
+import { ref, onMounted } from 'vue';
+import Registration from './AppRegistration.vue';
+import Authentication from './AppAuthentication.vue';
+import Cookies from 'js-cookie';
 
+const isModalOpenReg = ref(false);
+const isModalOpenAuth = ref(false);
+const isAuthenticated = ref(false);
+
+onMounted(() => {
+  const token = Cookies.get('authToken');
+  if (token) {
+    isAuthenticated.value = true;
+  }
+});
+
+const openModalRegistration = () => {
+  isModalOpenReg.value = true;
+};
+
+const openModalAuthentication = () => {
+  isModalOpenAuth.value = true;
+};
+
+const switchToAuthModal = () => {
+  isModalOpenReg.value = false;
+  isModalOpenAuth.value = true;
+};
+
+const switchToRegModal = () => {
+  isModalOpenAuth.value = false;
+  isModalOpenReg.value = true;
+};
+
+const handleAuthSuccess = (email) => {
+  isAuthenticated.value = true;
+};
+
+const logout = () => {
+  Cookies.remove('authToken');
+  isAuthenticated.value = false;
+};
 </script>
+
 <style scoped>
-header{
+header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  border-radius:5px ;
+  border-radius: 5px;
   background-color: white;
   width: 1600px;
   height: 52px;
@@ -43,13 +103,16 @@ header{
   flex-direction: row;
   justify-content: space-between;
 }
-.title div:first-child{
+
+.title div:first-child {
   cursor: pointer;
 }
-.city{
+
+.city {
   color: black;
 }
-.links{
+
+.links {
   display: flex;
   justify-content: space-between;
   color: black;
@@ -61,19 +124,22 @@ header{
   color: black;
   cursor: pointer;
 }
-.authreg{
+
+.authreg {
   display: flex;
   width: 18%;
   flex-direction: row;
   justify-content: space-between;
 }
-.authreg > button{
+
+.auth-buttons > button {
   border-radius: 5px;
   width: 83px;
   height: 36px;
   cursor: pointer;
 }
-.authreg button:nth-child(2){
+
+.auth-buttons button:nth-child(2) {
   background-color: #FF4A2B;
   width: 195px;
   height: 36px;
