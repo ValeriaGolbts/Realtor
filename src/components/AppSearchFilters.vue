@@ -206,15 +206,14 @@
             >
               <div class="listing-image-container">
                 <img
-                    :src="listing.image"
+                    :src="listing.image || '/images/default-property.jpg'"
                     alt="Квартира"
                     class="listing-image"
                 />
                 <span
-                    v-if="listing.oldPrice && listing.oldPrice.trim() !== ''"
+                    v-if="listing.old_price"
                     class="good-price"
-                >Хорошая цена</span
-                >
+                >Хорошая цена</span>
                 <img
                     class="heart-on-image"
                     @click="toggleFavorite(index)"
@@ -223,13 +222,26 @@
                 />
               </div>
               <div class="listing-info">
-                <span class="price">{{ listing.price }} ₽ / мес</span><br />
-                <span class="old-price" v-if="listing.oldPrice">{{listing.oldPrice }} ₽</span>
-                <p class="details">{{ listing.details }}</p>
-                <p class="complex-name">
+                <span class="price">{{ formatPrice(listing.price) }} / мес</span>
+                <span class="old-price" v-if="listing.old_price">{{ formatPrice(listing.old_price) }}</span>
+
+                <div class="listing-details">
+                  <div class="detail-row">
+                    <span class="detail-value">{{ formatRooms(listing.count_rooms) }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-value">{{ listing.total_square }} м²</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-value">{{ listing.floor }}</span>
+                    <span class="detail-label">этаж</span>
+                  </div>
+                </div>
+
+                <p class="address">{{ listing.address }}</p>
+                <p class="complex-name" v-if="listing.complex">
                   <strong>{{ listing.complex }}</strong>
                 </p>
-                <p class="address">{{ listing.address }}</p>
               </div>
             </div>
           </template>
@@ -296,259 +308,240 @@
   </div>
 </template>
 
-<script>
-import axios from 'axios';
+<script setup>
 import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 import { thisUrl } from "../url.js";
 
-export default {
-  setup() {
-    const listings = ref([]);
-    const rentTypes = ref([
-      { id: 'longTerm', name: 'Долгосрочная' },
-      { id: 'shortTerm', name: 'Посуточная' }
+// Reactive state
+const listings = ref([]);
+const searchQuery = ref('');
+const sortOrder = ref('asc');
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const loading = ref(false);
+const error = ref(null);
+
+const rentTypes = ref([
+  { id: 'longTerm', name: 'Долгосрочная' },
+  { id: 'shortTerm', name: 'Посуточная' }
+]);
+
+const propertyTypes = ref([]);
+const renovationTypes = ref([]);
+
+const priceRange = ref({
+  min: 0,
+  max: 100000,
+});
+
+const availableRooms = ref([
+  { id: 'студия', name: 'студия' },
+  { id: '1', name: '1' },
+  { id: '2', name: '2' },
+  { id: '3', name: '3' },
+  { id: '4', name: '4' },
+  { id: '5', name: '5' },
+  { id: '6+', name: '6+' },
+  { id: 'свободная планировка', name: 'свободная планировка' }
+]);
+
+const filters = ref({
+  type_rent_id: null,
+  type_realty_id: null,
+  price_min: 0,
+  price_max: 100000,
+  count_rooms: [],
+  total_square_min: null,
+  total_square_max: null,
+  living_square_min: null,
+  living_square_max: null,
+  floor_min: null,
+  floor_max: null,
+  repair_id: null,
+});
+
+// Computed properties
+const filteredListings = computed(() => {
+  let filtered = listings.value;
+
+  if (searchQuery.value) {
+    filtered = filtered.filter(listing =>
+        listing.address.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+
+  if (filters.value.type_rent_id) {
+    filtered = filtered.filter(listing => listing.type_rent === filters.value.type_rent_id);
+  }
+
+  if (filters.value.type_realty_id) {
+    filtered = filtered.filter(listing => listing.type_realty === filters.value.type_realty_id);
+  }
+
+  filtered = filtered.filter(
+      listing => listing.price >= filters.value.price_min && listing.price <= filters.value.price_max
+  );
+
+  if (filters.value.count_rooms.length > 0) {
+    filtered = filtered.filter(listing => filters.value.count_rooms.includes(listing.count_rooms));
+  }
+
+  if (filters.value.total_square_min) {
+    filtered = filtered.filter(listing => listing.total_square >= filters.value.total_square_min);
+  }
+  if (filters.value.total_square_max) {
+    filtered = filtered.filter(listing => listing.total_square <= filters.value.total_square_max);
+  }
+
+  if (filters.value.living_square_min) {
+    filtered = filtered.filter(listing => listing.living_square >= filters.value.living_square_min);
+  }
+  if (filters.value.living_square_max) {
+    filtered = filtered.filter(listing => listing.living_square <= filters.value.living_square_max);
+  }
+
+  if (filters.value.floor_min) {
+    filtered = filtered.filter(listing => listing.floor >= filters.value.floor_min);
+  }
+  if (filters.value.floor_max) {
+    filtered = filtered.filter(listing => listing.floor <= filters.value.floor_max);
+  }
+
+  if (filters.value.repair_id) {
+    filtered = filtered.filter(listing => listing.repair_id === filters.value.repair_id);
+  }
+
+  return filtered;
+});
+
+const paginatedListings = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredListings.value.slice(start, end);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredListings.value.length / itemsPerPage.value);
+});
+
+const sliderTrackStyle = computed(() => {
+  const minPercentage = ((filters.value.price_min - priceRange.value.min) / (priceRange.value.max - priceRange.value.min)) * 100;
+  const maxPercentage = ((filters.value.price_max - priceRange.value.min) / (priceRange.value.max - priceRange.value.min)) * 100;
+  return {
+    left: `${minPercentage}%`,
+    width: `${maxPercentage - minPercentage}%`,
+  };
+});
+
+const itemCount = computed(() => filteredListings.value.length);
+
+// Methods
+const fetchData = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const [listingsResponse, filterResponse] = await Promise.all([
+      axios.get(`${thisUrl()}/index`),
+      axios.get(`${thisUrl()}/realty/filter`),
     ]);
-    const propertyTypes = ref([]);
-    const renovationTypes = ref([]);
-    const searchQuery = ref('');
-    const sortOrder = ref('asc');
-    const filters = ref({
-      type_rent_id: null,
-      type_realty_id: null,
-      price_min: 0,
-      price_max: 100000,
-      count_rooms: [],
-      total_square_min: null,
-      total_square_max: null,
-      living_square_min: null,
-      living_square_max: null,
-      floor_min: null,
-      floor_max: null,
-      repair_id: null,
-    });
-    const priceRange = ref({
-      min: 0,
-      max: 100000,
-    });
-    const availableRooms = ref([
-      { id: 'студия', name: 'студия' },
-      { id: '1', name: '1' },
-      { id: '2', name: '2' },
-      { id: '3', name: '3' },
-      { id: '4', name: '4' },
-      { id: '5', name: '5' },
-      { id: '6+', name: '6+' },
-      { id: 'свободная планировка', name: 'свободная планировка' }
-    ]);
-    const currentPage = ref(1);
-    const itemsPerPage = ref(10);
-    const loading = ref(false);
-    const error = ref(null);
 
-    const filteredListings = computed(() => {
-      let filtered = listings.value;
+    listings.value = listingsResponse.data;
+    propertyTypes.value = filterResponse.data.propertyTypes;
+    renovationTypes.value = filterResponse.data.renovationTypes;
 
-      // Search filter
-      if (searchQuery.value) {
-        filtered = filtered.filter(listing =>
-            listing.address.toLowerCase().includes(searchQuery.value.toLowerCase())
-        );
-      }
-
-      // Rent Type filter
-      if (filters.value.type_rent_id) {
-        filtered = filtered.filter(listing => listing.type_rent === filters.value.type_rent_id);
-      }
-
-      // Property Type filter
-      if (filters.value.type_realty_id) {
-        filtered = filtered.filter(listing => listing.type_realty === filters.value.type_realty_id);
-      }
-
-      // Price filter
-      filtered = filtered.filter(
-          listing => listing.price >= filters.value.price_min && listing.price <= filters.value.price_max
-      );
-
-      // Rooms filter
-      if (filters.value.count_rooms.length > 0) {
-        filtered = filtered.filter(listing => filters.value.count_rooms.includes(listing.count_rooms));
-      }
-
-      // Total Area filter
-      if (filters.value.total_square_min) {
-        filtered = filtered.filter(listing => listing.total_square >= filters.value.total_square_min);
-      }
-      if (filters.value.total_square_max) {
-        filtered = filtered.filter(listing => listing.total_square <= filters.value.total_square_max);
-      }
-
-      // Living Area filter
-      if (filters.value.living_square_min) {
-        filtered = filtered.filter(listing => listing.living_square >= filters.value.living_square_min);
-      }
-      if (filters.value.living_square_max) {
-        filtered = filtered.filter(listing => listing.living_square <= filters.value.living_square_max);
-      }
-
-      // Floor filter
-      if (filters.value.floor_min) {
-        filtered = filtered.filter(listing => listing.floor >= filters.value.floor_min);
-      }
-      if (filters.value.floor_max) {
-        filtered = filtered.filter(listing => listing.floor <= filters.value.floor_max);
-      }
-
-      // Renovation Type filter
-      if (filters.value.repair_id) {
-        filtered = filtered.filter(listing => listing.repair_id === filters.value.repair_id);
-      }
-
-      return filtered;
-    });
-
-    const paginatedListings = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return filteredListings.value.slice(start, end);
-    });
-
-    const totalPages = computed(() => {
-      return Math.ceil(filteredListings.value.length / itemsPerPage.value);
-    });
-
-    const sliderTrackStyle = computed(() => {
-      const minPercentage = ((filters.value.price_min - priceRange.value.min) / (priceRange.value.max - priceRange.value.min)) * 100;
-      const maxPercentage = ((filters.value.price_max - priceRange.value.min) / (priceRange.value.max - priceRange.value.min)) * 100;
-      return {
-        left: `${minPercentage}%`,
-        width: `${maxPercentage - minPercentage}%`,
-      };
-    });
-
-    const itemCount = computed(() => filteredListings.value.length);
-
-    const fetchData = async () => {
-      loading.value = true;
-      error.value = null;
-      try {
-        const [listingsResponse, filterResponse] = await Promise.all([
-          axios.get(`${thisUrl()}/index`),
-          axios.get(`${thisUrl()}/realty/filter`),
-        ]);
-
-        listings.value = listingsResponse.data;
-        propertyTypes.value = filterResponse.data.propertyTypes;
-        renovationTypes.value = filterResponse.data.renovationTypes;
-
-        console.log('listings:', listings.value);
-        console.log('propertyTypes:', propertyTypes.value);
-        console.log('renovationTypes', renovationTypes.value)
-      } catch (err) {
-        console.error(err);
-        error.value = 'Failed to fetch data.';
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const applyFilters = () => {
-      currentPage.value = 1; // Сброс пагинации при применении фильтров
-    };
-
-    const resetFilters = () => {
-      filters.value = {
-        type_rent_id: null,
-        type_realty_id: null,
-        price_min: 0,
-        price_max: 100000,
-        count_rooms: [],
-        total_square_min: null,
-        total_square_max: null,
-        living_square_min: null,
-        living_square_max: null,
-        floor_min: null,
-        floor_max: null,
-        repair_id: null,
-      };
-      applyFilters();
-    };
-
-    const setRentType = (type) => {
-      filters.value.type_rent_id = type;
-    };
-
-    const selectPropertyType = (typeId) => {
-      filters.value.type_realty_id = typeId;
-    };
-
-    const toggleRoom = (roomId) => {
-      if (filters.value.count_rooms.includes(roomId)) {
-        filters.value.count_rooms = filters.value.count_rooms.filter(id => id !== roomId);
-      } else {
-        filters.value.count_rooms.push(roomId);
-      }
-    };
-
-    const selectRenovationType = (typeId) => {
-      filters.value.repair_id = typeId;
-    };
-
-    const updateRange = () => {
-      // You might want to add some validation here to prevent min > max
-    };
-
-    const toggleSortOrder = () => {
-      sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-    };
-
-    const changePage = (page) => {
-      currentPage.value = page;
-    };
-
-    onMounted(fetchData);
-
-    return {
-      listings,
-      rentTypes,
-      propertyTypes,
-      renovationTypes,
-      searchQuery,
-      sortOrder,
-      filters,
-      priceRange,
-      availableRooms,
-      currentPage,
-      itemsPerPage,
-      loading,
-      error,
-      filteredListings,
-      paginatedListings,
-      totalPages,
-      sliderTrackStyle,
-      itemCount,
-      fetchData,
-      applyFilters,
-      resetFilters,
-      setRentType,
-      selectPropertyType,
-      toggleRoom,
-      selectRenovationType,
-      updateRange,
-      toggleSortOrder,
-      changePage,
-    };
-  },
+    console.log('listings:', listings.value);
+    console.log('propertyTypes:', propertyTypes.value);
+    console.log('renovationTypes', renovationTypes.value);
+  } catch (err) {
+    console.error(err);
+    error.value = 'Failed to fetch data.';
+  } finally {
+    loading.value = false;
+  }
 };
+
+const applyFilters = () => {
+  currentPage.value = 1;
+};
+
+const resetFilters = () => {
+  filters.value = {
+    type_rent_id: null,
+    type_realty_id: null,
+    price_min: 0,
+    price_max: 100000,
+    count_rooms: [],
+    total_square_min: null,
+    total_square_max: null,
+    living_square_min: null,
+    living_square_max: null,
+    floor_min: null,
+    floor_max: null,
+    repair_id: null,
+  };
+  applyFilters();
+};
+
+const setRentType = (type) => {
+  filters.value.type_rent_id = type;
+};
+
+const selectPropertyType = (typeId) => {
+  filters.value.type_realty_id = typeId;
+};
+
+const toggleRoom = (roomId) => {
+  if (filters.value.count_rooms.includes(roomId)) {
+    filters.value.count_rooms = filters.value.count_rooms.filter(id => id !== roomId);
+  } else {
+    filters.value.count_rooms.push(roomId);
+  }
+};
+
+const selectRenovationType = (typeId) => {
+  filters.value.repair_id = typeId;
+};
+
+const updateRange = () => {
+  // Validation can be added here
+};
+
+const toggleSortOrder = () => {
+  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+};
+
+const changePage = (page) => {
+  currentPage.value = page;
+};
+
+const formatPrice = (price) => {
+  if (!price) return '';
+  return new Intl.NumberFormat('ru-RU').format(price);
+};
+
+const formatRooms = (count) => {
+  if (count === 0) return 'Студия';
+  if (count > 6) return '6+';
+  if (count > 0 && count < 6) return `${count} комн.`;
+  return `${count}`;
+};
+
+const toggleFavorite = (index) => {
+  listings.value[index].isFavorited = !listings.value[index].isFavorited;
+  // Здесь можно добавить вызов API для сохранения в избранное
+};
+
+onMounted(fetchData);
 </script>
 
 <style scoped>
+/* Your existing styles remain unchanged */
 .dots {
   color: white;
   font-size: 18px;
   margin-top: 7%;
   margin-right: 3%;
-
 }
 
 .title {
@@ -827,7 +820,7 @@ button.active {
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 20px;
-  flex-grow: 1; /* listings-container занимает всё доступное пространство */
+  flex-grow: 1;
 }
 
 .listing {
@@ -837,7 +830,7 @@ button.active {
   border-radius: 5px;
   overflow: hidden;
   height: 540px;
-  width: calc(33.33% - 20px);
+  width: 427px; /* Фиксированная ширина вместо calc(33.33% - 20px) */
   box-sizing: border-box;
   flex-grow: 0;
   flex-shrink: 0;
@@ -953,7 +946,6 @@ button.active {
   text-align: center;
 }
 
-/* Slider styles */
 .slider-container {
   position: relative;
   width: 100%;
@@ -996,5 +988,10 @@ button.active {
   border: none;
   cursor: pointer;
   pointer-events: auto;
+}
+.listing-details{
+  display: flex;
+  gap: 25px;
+  font-size: 24px;
 }
 </style>
