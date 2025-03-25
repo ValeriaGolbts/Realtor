@@ -1,4 +1,5 @@
 <template>
+  <section class="up-footer">
   <div class="img_footer">
     <div>
       <img src="./icons/TOMSK.svg">
@@ -22,6 +23,7 @@
     </div>
     <div class="idk">© 2011—2025 TomskZone</div>
   </div>
+  </section>
 </template>
 
 <script setup>
@@ -29,6 +31,11 @@
 </script>
 
 <style>
+
+.up-footer {
+  width: 100%;
+}
+
 .img_footer{
   margin-left: 160px;
   margin-right: 160px;

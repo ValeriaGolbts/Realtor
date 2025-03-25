@@ -187,7 +187,7 @@ body {
 
 main {
   background-color: rgba(242, 238, 235, 1);
-  width: 1920px;
+  width: 100%;
 }
 
 .main {
@@ -369,7 +369,7 @@ main {
   font-size: 13px;
   text-align: center;
   background-color: #fff;
-  color: rgba(255, 110, 66, 1);
+  color: rgb(255, 110, 66);
 }
 
 .heart-on-image {
@@ -422,7 +422,7 @@ main {
   height: 40px;
   border-radius: 5px;
   padding: 10px 16px;
-  border: 1px solid rgba(255, 110, 66, 1);
+  border: 1px solid rgb(255, 110, 66);
   font-family: Noto Sans;
   font-weight: 600;
   font-size: 13px;

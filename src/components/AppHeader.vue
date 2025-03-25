@@ -14,9 +14,27 @@
         <a>Недвижимость посуточно</a>
       </div>
       <div class="authreg">
-        <button>ВОЙТИ</button>
-        <button>ЗАРЕГИСТРИРОВАТЬСЯ</button>
+        <!-- Условный рендеринг в зависимости от состояния авторизации -->
+        <div v-if="!isAuthenticated" class="auth-buttons">
+          <button @click="openModalAuthentication">ВОЙТИ</button>
+          <button @click="openModalRegistration">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+        </div>
+        <div v-else class="user-menu">
+          <button class="create-ad">Создать объявление</button>
+          <img src="@/assets/shape_black.svg" alt="Избранное" class="icon">
+          <img src="@/assets/avatar.png" alt="Аватар" class="avatar" @click="logout">
+        </div>
       </div>
+      <Registration
+          v-model:isOpen="isModalOpenReg"
+          @go-to-login="switchToAuthModal"
+          @auth-success="handleAuthSuccess"
+      />
+      <Authentication
+          v-model:isOpen="isModalOpenAuth"
+          @go-to-register="switchToRegModal"
+          @auth-success="handleAuthSuccess"
+      />
     </header>
     <div class="decription">
       <div class="decription1">
@@ -27,7 +45,7 @@
         <img src="./icons/TOMSKZONE.svg">
       </div>
       <div class="decription2">
-        <div>Ищите спецпредложения </div>
+        <div>Ищите спецпредложения</div>
         <div>на квартиры, дома и другие варианты</div>
       </div>
     </div>
@@ -52,17 +70,60 @@
       <button>НАЙТИ</button>
     </div>
   </section>
-  </template>
-<script setup>
+</template>
 
+<script setup>
+import { ref, onMounted } from 'vue';
+import Registration from './AppRegistration.vue';
+import Authentication from './AppAuthentication.vue';
+import Cookies from 'js-cookie';
+
+const isModalOpenReg = ref(false);
+const isModalOpenAuth = ref(false);
+const isAuthenticated = ref(false);
+
+onMounted(() => {
+  const token = Cookies.get('authToken');
+  if (token) {
+    isAuthenticated.value = true;
+  }
+});
+
+const openModalRegistration = () => {
+  isModalOpenReg.value = true;
+};
+
+const openModalAuthentication = () => {
+  isModalOpenAuth.value = true;
+};
+
+const switchToAuthModal = () => {
+  isModalOpenReg.value = false;
+  isModalOpenAuth.value = true;
+};
+
+const switchToRegModal = () => {
+  isModalOpenAuth.value = false;
+  isModalOpenReg.value = true;
+};
+
+const handleAuthSuccess = (email) => {
+  isAuthenticated.value = true;
+};
+
+const logout = () => {
+  Cookies.remove('authToken');
+  isAuthenticated.value = false;
+};
 </script>
+
 <style scoped>
-header{
+header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  border-radius:5px ;
+  border-radius: 5px;
   background-color: white;
   width: 1600px;
   height: 52px;
@@ -72,66 +133,121 @@ header{
   margin-right: 160px;
   margin-left: 160px;
 }
-section{
+
+section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 1920px;
+  width: 100%;
   height: 760px;
   background-image: url("./icons/Banner_main (1).svg");
   justify-content: space-between;
 }
-.title{
+
+.title {
   display: flex;
   width: 18%;
   flex-direction: row;
   justify-content: space-between;
 }
-.title div:first-child{
+
+.title div:first-child {
   cursor: pointer;
 }
-.city{
+
+.city {
   color: black;
 }
-.links{
+
+.links {
   display: flex;
   justify-content: space-between;
   color: black;
   font-size: 16px;
 }
-.links > a{
+
+.links > a {
   cursor: pointer;
 }
-.authreg{
+
+.authreg {
   display: flex;
   width: 18%;
   flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.auth-buttons {
+  display: flex;
+  width: 100%;
   justify-content: space-between;
 }
-.authreg > button{
+
+.auth-buttons > button {
   border-radius: 5px;
   width: 83px;
   height: 36px;
   cursor: pointer;
 }
-.authreg button:nth-child(2){
+
+.auth-buttons button:nth-child(2) {
   background-color: #FF4A2B;
   width: 195px;
   height: 36px;
   cursor: pointer;
   border: none;
 }
-.decription{
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px
+}
+
+.create-ad {
+  border: 1px solid #FF4A2B;
+  background: none;
+  color: #000;
+  padding: 10px;
+  width: 200px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+  transition: all 500ms ease;
+  font-family: Noto Sans;
+}
+
+.create-ad:hover {
+  background-color: rgba(255, 110, 66, 1);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.decription {
   margin-right: 160px;
   margin-left: 160px;
 }
-.decription1{
+
+.decription1 {
   color: white;
   font-size: 24px;
 }
-.decription2{
-  display: flex
-;
+
+.decription2 {
+  display: flex;
   flex-direction: column;
   color: white;
   flex-wrap: wrap;
@@ -139,6 +255,7 @@ section{
   font-size: 24px;
   margin-left: 123px;
 }
+
 .filter-container {
   display: flex;
   gap: 5px;
@@ -168,7 +285,7 @@ section{
   font-size: 14px;
 }
 
-.filter>select {
+.filter > select {
   background-color: white;
   appearance: none;
   -webkit-appearance: none;
@@ -182,32 +299,36 @@ section{
   transition: none;
 }
 
-.filter select:nth-child(1){
+.filter select:nth-child(1) {
   width: 74px;
 }
-.filter select:nth-child(2){
+
+.filter select:nth-child(2) {
   width: 156px;
 }
-.filter input:nth-child(1){
+
+.filter input:nth-child(1) {
   width: 186px;
 }
-.border{
+
+.border {
   margin-top: 5px;
   border-right: 1px solid red;
   height: 23px;
 }
 
-
 .filter-container select:invalid {
   color: #999;
 }
-.filter{
+
+.filter {
   display: flex;
   background-color: white;
   border-radius: 5px;
   width: 726px;
 }
-.filter>input{
+
+.filter > input {
   border: none;
   background-color: white;
 }
