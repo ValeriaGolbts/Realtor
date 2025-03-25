@@ -23,7 +23,6 @@ watch(route, (newRoute) => {
   if (newRoute.path === '/filters-search') {
     headerBackground.value = 'black';
     isCustomHeader.value = true;
-    showFooter.value = newRoute.path !== '/filters-search';
   } else if (newRoute.path === '/') {
     isCustomHeader.value = true;
   } else if(newRoute.path ==='/create_announ'){

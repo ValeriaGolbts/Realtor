@@ -1,41 +1,41 @@
 <template>
-    <header>
-      <div class="title">
-        <router-link to="/">
-          <img src="./icons/Logo.svg">
-        </router-link>
-        <div class="city">
-          <img src="./icons/shape.svg"> Томск
-        </div>
+  <header>
+    <div class="title">
+      <router-link to="/">
+        <img src="./icons/Logo.svg">
+      </router-link>
+      <div class="city">
+        <img src="./icons/shape.svg"> Томск
       </div>
-      <div class="links">
-        <router-link class="router-link" to="/filters-search">Длительная аренда</router-link>
-        <router-link class="router-link" to="/filters-search">Недвижимость посуточно</router-link>
+    </div>
+    <div class="links">
+      <router-link class="router-link" to="/filters-search">Длительная аренда</router-link>
+      <router-link class="router-link" to="/filters-search">Недвижимость посуточно</router-link>
+    </div>
+    <div class="authreg">
+      <!-- Условный рендеринг в зависимости от состояния авторизации -->
+      <div v-if="!isAuthenticated" class="auth-buttons">
+        <button @click="openModalAuthentication">ВОЙТИ</button>
+        <button @click="openModalRegistration">ЗАРЕГИСТРИРОВАТЬСЯ</button>
       </div>
-      <div class="authreg">
-        <!-- Условный рендеринг в зависимости от состояния авторизации -->
-        <div v-if="!isAuthenticated" class="auth-buttons">
-          <button @click="openModalAuthentication">ВОЙТИ</button>
-          <button @click="openModalRegistration">ЗАРЕГИСТРИРОВАТЬСЯ</button>
-        </div>
-        <div v-else class="user-menu">
-          <button class="create-ad">Создать объявление</button>
-          <img src="@/assets/shape_black.svg" alt="Избранное" class="icon">
-          <img src="@/assets/avatar.png" alt="Аватар" class="avatar" @click="logout">
-        </div>
+      <div v-else class="user-menu">
+        <button class="create-ad">Создать объявление</button>
+        <img src="@/assets/shape_black.svg" alt="Избранное" class="icon">
+        <img src="@/assets/avatar.png" alt="Аватар" class="avatar" @click="logout">
       </div>
-      <Registration
-          v-model:isOpen="isModalOpenReg"
-          @go-to-login="switchToAuthModal"
-          @auth-success="handleAuthSuccess"
-      />
-      <Authentication
-          v-model:isOpen="isModalOpenAuth"
-          @go-to-register="switchToRegModal"
-          @auth-success="handleAuthSuccess"
-      />
-    </header>
-  </template>
+    </div>
+    <Registration
+        v-model:isOpen="isModalOpenReg"
+        @go-to-login="switchToAuthModal"
+        @auth-success="handleAuthSuccess"
+    />
+    <Authentication
+        v-model:isOpen="isModalOpenAuth"
+        @go-to-register="switchToRegModal"
+        @auth-success="handleAuthSuccess"
+    />
+  </header>
+</template>
 <script setup>
 import { ref, onMounted } from 'vue';
 import Registration from './AppRegistration.vue';
@@ -138,6 +138,9 @@ header {
   height: 36px;
   cursor: pointer;
 }
+.auth-buttons{
+  display: flex;
+}
 
 .auth-buttons button:nth-child(2) {
   background-color: #FF4A2B;
@@ -145,6 +148,43 @@ header {
   height: 36px;
   cursor: pointer;
   border: none;
+}
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px
+}
+
+.create-ad {
+  border: 1px solid #FF4A2B;
+  background: none;
+  color: #000;
+  padding: 10px;
+  width: 200px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+  transition: all 500ms ease;
+  font-family: Noto Sans;
+}
+
+.create-ad:hover {
+  background-color: rgba(255, 110, 66, 1);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-right: 4%;
 }
 
 </style>
