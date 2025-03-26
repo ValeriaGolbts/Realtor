@@ -112,17 +112,15 @@ header {
   color: black;
 }
 
-.links {
-  display: flex;
-  justify-content: space-between;
-  color: black;
-  font-size: 16px;
-  width: 21%;
-}
 .router-link{
   text-decoration: none;
   color: black;
   cursor: pointer;
+  font-size: 15px;
+}
+.links{
+  display: flex;
+  gap: 35px;
 }
 
 .authreg {
@@ -166,7 +164,6 @@ header {
   font-size: 16px;
   margin-right: 10px;
   transition: all 500ms ease;
-  font-family: Noto Sans;
 }
 
 .create-ad:hover {

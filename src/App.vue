@@ -13,6 +13,7 @@ import { ref, provide, watch } from 'vue';
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import { useRoute } from 'vue-router';
+import '@/assets/fonts/fonts.css';
 
 const route = useRoute();
 const headerBackground = ref('');
@@ -48,6 +49,7 @@ watch(route, (newRoute) => {
 /*}*/
 body{
   margin: 0;
+  font-family: 'NotoSans', sans-serif;
 }
 </style>
 

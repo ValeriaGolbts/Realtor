@@ -53,7 +53,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { thisUrl } from '../url.js';
 import Cookies from 'js-cookie';
-
+import '@/assets/fonts/fonts.css';
 const emit = defineEmits(['update:isOpen', 'go-to-register', 'go-to-policy', 'go-to-forgot-password', 'auth-success']);
 defineProps({
   isOpen: {
