@@ -203,11 +203,11 @@
                 v-for="(listing, index) in paginatedListings"
                 :key="index"
                 class="listing"
-                @click="viewApartment(listing.id)"
+                @click="goToAnnouncement(listing.id)"
             >
               <div class="listing-image-container">
                 <img
-                    :src="listing.image || '/images/default-property.jpg'"
+                    :src="listing.images[0] || '/images/default-property.jpg'"
                     alt="Квартира"
                     class="listing-image"
                 />
@@ -315,11 +315,7 @@ import axios from 'axios';
 import { thisUrl } from "../url.js";
 import { useRouter } from 'vue-router';
 
-const router = useRouter();
 
-const viewApartment = (id) => {
-  router.push({ name: 'announ', params: { id } });
-};
 // Reactive state
 const listings = ref([]);
 const searchQuery = ref('');
@@ -328,7 +324,11 @@ const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const loading = ref(false);
 const error = ref(null);
+const router = useRouter(); // Импортируйте useRouter из vue-router
 
+const goToAnnouncement = (id) => {
+  router.push(`/announ/${id}`);
+};
 const rentTypes = ref([
   { id: 'longTerm', name: 'Долгосрочная' },
   { id: 'shortTerm', name: 'Посуточная' }
@@ -1002,12 +1002,7 @@ button.active {
   font-size: 24px;
 }
 .listing {
-  cursor: pointer;  /* Добавляем курсор-указатель */
-  transition: transform 0.2s;
-}
-
-.listing:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  cursor: pointer;
+  /* остальные стили */
 }
 </style>
