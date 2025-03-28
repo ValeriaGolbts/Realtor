@@ -4,6 +4,7 @@ import AppReg from '../components/AppReg.vue'
 import AppSendEmail from '../components/AppSendEmail.vue'
 import AppSearchFilters from '../components/AppSearchFilters.vue'
 import AppCreateAnnouncement from '../components/AppCreateAnnouncement.vue'
+import AppAnnouncement from '../components/AppAnnouncement.vue'
 import AppTest from '../components/AppTest.vue'
 
 const routes = [
@@ -34,6 +35,12 @@ const routes = [
     path: '/create_announ',
     name: 'create',
     component: () => import('../components/AppCreateAnnouncement.vue'),
+  },
+  {
+    path: '/announ/:id',  // Добавляем параметр :id
+    name: 'announ',
+    component: () => import('../components/AppAnnouncement.vue'),
+    props: true  // Передаем параметры как props
   },
 
 ];
