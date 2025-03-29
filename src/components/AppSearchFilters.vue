@@ -3,7 +3,7 @@
     <div class="content-container">
       <div class="title">Долгосрочная аренда 1-комн <br> и 2-комн квартир</div>
       <div class="adv">
-        <span class="label">{{ filteredListings.length }} ОБЪЯВЛЕНИЯ</span>
+        <span class="label">{{ totalItems }} ОБЪЯВЛЕНИЯ</span>
       </div>
       <div class="search-and-sort">
         <input
@@ -11,6 +11,7 @@
             v-model="searchQuery"
             placeholder="Q Адрес, район, улица"
             class="address-search-input"
+            @input="handleSearch"
         />
         <img
             src="./icons/sort.svg"
@@ -32,13 +33,11 @@
               <label>Тип аренды</label>
               <div class="rent-type-buttons">
                 <button
-                    :class="{ active: filters.type_rent_id === 'longTerm' }"
-                    @click="setRentType('longTerm')"
-                >Долгосрочная</button>
-                <button
-                    :class="{ active: filters.type_rent_id === 'shortTerm' }"
-                    @click="setRentType('shortTerm')"
-                >Посуточная</button>
+                    v-for="type in rentTypes"
+                    :key="type.id"
+                    :class="{ active: filters.type_rent_id == type.id }"
+                    @click="setRentType(type.id)"
+                >{{ type.name }}</button>
               </div>
             </div>
 
@@ -48,7 +47,7 @@
                 <button
                     v-for="type in propertyTypes"
                     :key="type.id"
-                    :class="{ active: filters.type_realty_id === type.id }"
+                    :class="{ active: filters.type_realty_id == type.id }"
                     @click="selectPropertyType(type.id)"
                     class="property-type-item"
                 >{{ type.title }}</button>
@@ -85,14 +84,14 @@
                       type="number"
                       v-model.number="filters.price_min"
                       placeholder="От"
-                      @input="updateRange"
+                      @change="applyFilters"
                   />
                   <input
                       class="input"
                       type="number"
                       v-model.number="filters.price_max"
                       placeholder="До"
-                      @input="updateRange"
+                      @change="applyFilters"
                   />
                 </div>
               </div>
@@ -120,6 +119,7 @@
                       type="number"
                       v-model.number="filters.total_square_min"
                       placeholder="От"
+                      @change="applyFilters"
                   />
                   <span class="area-unit">м²</span>
                 </div>
@@ -129,6 +129,7 @@
                       type="number"
                       v-model.number="filters.total_square_max"
                       placeholder="До"
+                      @change="applyFilters"
                   />
                   <span class="area-unit">м²</span>
                 </div>
@@ -144,6 +145,7 @@
                       type="number"
                       v-model.number="filters.living_square_min"
                       placeholder="От"
+                      @change="applyFilters"
                   />
                   <span class="area-unit">м²</span>
                 </div>
@@ -153,6 +155,7 @@
                       type="number"
                       v-model.number="filters.living_square_max"
                       placeholder="До"
+                      @change="applyFilters"
                   />
                   <span class="area-unit">м²</span>
                 </div>
@@ -167,12 +170,14 @@
                     type="number"
                     v-model.number="filters.floor_min"
                     placeholder="От"
+                    @change="applyFilters"
                 />
                 <input
                     class="input"
                     type="number"
                     v-model.number="filters.floor_max"
                     placeholder="До"
+                    @change="applyFilters"
                 />
               </div>
             </div>
@@ -183,7 +188,7 @@
                 <button
                     v-for="type in renovationTypes"
                     :key="type.id"
-                    :class="{ active: filters.repair_id === type.id }"
+                    :class="{ active: filters.repair_id == type.id }"
                     @click="selectRenovationType(type.id)"
                     class="renovation-type-item"
                 >{{ type.title }}</button>
@@ -198,18 +203,19 @@
 
         <!-- Объявления -->
         <div class="listings-container">
-          <template v-if="filteredListings.length > 0">
+          <template v-if="listings.length > 0">
             <div
-                v-for="(listing, index) in paginatedListings"
-                :key="index"
+                v-for="(listing, index) in listings"
+                :key="listing.id"
                 class="listing"
                 @click="goToAnnouncement(listing.id)"
             >
               <div class="listing-image-container">
                 <img
-                    :src="listing.images[0] || '/images/default-property.jpg'"
+                    :src="listing.images[0]"
                     alt="Квартира"
                     class="listing-image"
+                    @error="handleImageError"
                 />
                 <span
                     v-if="listing.old_price"
@@ -217,8 +223,8 @@
                 >Хорошая цена</span>
                 <img
                     class="heart-on-image"
-                    @click="toggleFavorite(index)"
-                    :src="listing.isFavorited ? fullShape : shape"
+                    @click.stop="toggleFavorite(listing.id, index)"
+                    :src="listing.is_favorite"
                     alt="Добавить в избранное"
                 />
               </div>
@@ -255,7 +261,7 @@
       </div>
 
       <!-- Пагинация -->
-      <div class="pagination">
+      <div class="pagination" v-if="totalPages > 1">
         <!-- Кнопка "Назад" -->
         <button
             :disabled="currentPage === 1"
@@ -310,11 +316,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { thisUrl } from "../url.js";
 import { useRouter } from 'vue-router';
 
+const router = useRouter();
 
 // Reactive state
 const listings = ref([]);
@@ -324,14 +331,15 @@ const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const loading = ref(false);
 const error = ref(null);
-const router = useRouter(); // Импортируйте useRouter из vue-router
+const totalItems = ref(0);
 
 const goToAnnouncement = (id) => {
   router.push(`/announ/${id}`);
 };
+
 const rentTypes = ref([
-  { id: 'longTerm', name: 'Долгосрочная' },
-  { id: 'shortTerm', name: 'Посуточная' }
+  { id: 1, name: 'Долгосрочная' },
+  { id: 2, name: 'Посуточная' }
 ]);
 
 const propertyTypes = ref([]);
@@ -339,7 +347,7 @@ const renovationTypes = ref([]);
 
 const priceRange = ref({
   min: 0,
-  max: 100000,
+  max: 300000,
 });
 
 const availableRooms = ref([
@@ -357,7 +365,7 @@ const filters = ref({
   type_rent_id: null,
   type_realty_id: null,
   price_min: 0,
-  price_max: 100000,
+  price_max: 300000,
   count_rooms: [],
   total_square_min: null,
   total_square_max: null,
@@ -369,67 +377,8 @@ const filters = ref({
 });
 
 // Computed properties
-const filteredListings = computed(() => {
-  let filtered = listings.value;
-
-  if (searchQuery.value) {
-    filtered = filtered.filter(listing =>
-        listing.address.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
-
-  if (filters.value.type_rent_id) {
-    filtered = filtered.filter(listing => listing.type_rent === filters.value.type_rent_id);
-  }
-
-  if (filters.value.type_realty_id) {
-    filtered = filtered.filter(listing => listing.type_realty === filters.value.type_realty_id);
-  }
-
-  filtered = filtered.filter(
-      listing => listing.price >= filters.value.price_min && listing.price <= filters.value.price_max
-  );
-
-  if (filters.value.count_rooms.length > 0) {
-    filtered = filtered.filter(listing => filters.value.count_rooms.includes(listing.count_rooms));
-  }
-
-  if (filters.value.total_square_min) {
-    filtered = filtered.filter(listing => listing.total_square >= filters.value.total_square_min);
-  }
-  if (filters.value.total_square_max) {
-    filtered = filtered.filter(listing => listing.total_square <= filters.value.total_square_max);
-  }
-
-  if (filters.value.living_square_min) {
-    filtered = filtered.filter(listing => listing.living_square >= filters.value.living_square_min);
-  }
-  if (filters.value.living_square_max) {
-    filtered = filtered.filter(listing => listing.living_square <= filters.value.living_square_max);
-  }
-
-  if (filters.value.floor_min) {
-    filtered = filtered.filter(listing => listing.floor >= filters.value.floor_min);
-  }
-  if (filters.value.floor_max) {
-    filtered = filtered.filter(listing => listing.floor <= filters.value.floor_max);
-  }
-
-  if (filters.value.repair_id) {
-    filtered = filtered.filter(listing => listing.repair_id === filters.value.repair_id);
-  }
-
-  return filtered;
-});
-
-const paginatedListings = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return filteredListings.value.slice(start, end);
-});
-
 const totalPages = computed(() => {
-  return Math.ceil(filteredListings.value.length / itemsPerPage.value);
+  return Math.ceil(totalItems.value / itemsPerPage.value);
 });
 
 const sliderTrackStyle = computed(() => {
@@ -441,28 +390,81 @@ const sliderTrackStyle = computed(() => {
   };
 });
 
-const itemCount = computed(() => filteredListings.value.length);
+const visiblePages = computed(() => {
+  const pages = [];
+  const maxVisible = 5;
+  let start = 1;
+  let end = totalPages.value;
+
+  if (totalPages.value > maxVisible) {
+    start = Math.max(1, currentPage.value - 2);
+    end = Math.min(totalPages.value, start + maxVisible - 1);
+
+    if (end - start + 1 < maxVisible) {
+      start = end - maxVisible + 1;
+    }
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
+const showEllipsisAfter = computed(() => {
+  return visiblePages.value[visiblePages.value.length - 1] < totalPages.value - 1;
+});
+
+const showLastPage = computed(() => {
+  return visiblePages.value[visiblePages.value.length - 1] < totalPages.value;
+});
 
 // Methods
 const fetchData = async () => {
   loading.value = true;
   error.value = null;
   try {
-    const [listingsResponse, filterResponse] = await Promise.all([
-      axios.get(`${thisUrl()}/index`),
-      axios.get(`${thisUrl()}/realty/filter`),
-    ]);
+    const params = {
+      page: currentPage.value,
+      per_page: itemsPerPage.value,
+      ...filters.value,
+      search: searchQuery.value,
+      sort: sortOrder.value,
+    };
 
-    listings.value = listingsResponse.data;
-    propertyTypes.value = filterResponse.data.propertyTypes;
-    renovationTypes.value = filterResponse.data.renovationTypes;
+    // Удаляем null/undefined параметры
+    Object.keys(params).forEach(key => {
+      if (params[key] === null || params[key] === undefined || params[key] === '') {
+        delete params[key];
+      }
+    });
 
-    console.log('listings:', listings.value);
-    console.log('propertyTypes:', propertyTypes.value);
-    console.log('renovationTypes', renovationTypes.value);
+    // Если массив count_rooms пуст, удаляем его из параметров
+    if (params.count_rooms && params.count_rooms.length === 0) {
+      delete params.count_rooms;
+    }
+
+    const response = await axios.get(`${thisUrl()}/realty/filter`, { params });
+
+    listings.value = response.data.listings || [];
+    propertyTypes.value = response.data.propertyTypes || [];
+    renovationTypes.value = response.data.renovationTypes || [];
+    totalItems.value = response.data.total || 0;
+
+    // Обновляем диапазон цен на основе ответа сервера
+    if (response.data.priceRange) {
+      priceRange.value = {
+        min: Math.floor(response.data.priceRange.min),
+        max: Math.ceil(response.data.priceRange.max),
+      };
+      filters.value.price_min = priceRange.value.min;
+      filters.value.price_max = priceRange.value.max;
+    }
+
   } catch (err) {
-    console.error(err);
-    error.value = 'Failed to fetch data.';
+    console.error('Ошибка при загрузке данных:', err);
+    error.value = 'Не удалось загрузить данные.';
   } finally {
     loading.value = false;
   }
@@ -470,14 +472,26 @@ const fetchData = async () => {
 
 const applyFilters = () => {
   currentPage.value = 1;
+  fetchData();
 };
+
+const handleSearch = () => {
+  // Добавляем задержку для поиска, чтобы не делать запрос на каждый ввод
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1;
+    fetchData();
+  }, 500);
+};
+
+let searchTimeout = null;
 
 const resetFilters = () => {
   filters.value = {
     type_rent_id: null,
     type_realty_id: null,
-    price_min: 0,
-    price_max: 100000,
+    price_min: priceRange.value.min,
+    price_max: priceRange.value.max,
     count_rooms: [],
     total_square_min: null,
     total_square_max: null,
@@ -487,15 +501,18 @@ const resetFilters = () => {
     floor_max: null,
     repair_id: null,
   };
+  searchQuery.value = '';
   applyFilters();
 };
 
-const setRentType = (type) => {
-  filters.value.type_rent_id = type;
+const setRentType = (typeId) => {
+  filters.value.type_rent_id = filters.value.type_rent_id === typeId ? null : typeId;
+  applyFilters();
 };
 
 const selectPropertyType = (typeId) => {
-  filters.value.type_realty_id = typeId;
+  filters.value.type_realty_id = filters.value.type_realty_id === typeId ? null : typeId;
+  applyFilters();
 };
 
 const toggleRoom = (roomId) => {
@@ -504,22 +521,35 @@ const toggleRoom = (roomId) => {
   } else {
     filters.value.count_rooms.push(roomId);
   }
+  applyFilters();
 };
 
 const selectRenovationType = (typeId) => {
-  filters.value.repair_id = typeId;
+  filters.value.repair_id = filters.value.repair_id === typeId ? null : typeId;
+  applyFilters();
 };
 
 const updateRange = () => {
-  // Validation can be added here
+  // Убедимся, что min не больше max
+  if (filters.value.price_min > filters.value.price_max) {
+    filters.value.price_min = filters.value.price_max;
+  }
+  // И наоборот
+  if (filters.value.price_max < filters.value.price_min) {
+    filters.value.price_max = filters.value.price_min;
+  }
 };
 
 const toggleSortOrder = () => {
   sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  fetchData();
 };
 
 const changePage = (page) => {
-  currentPage.value = page;
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    fetchData();
+  }
 };
 
 const formatPrice = (price) => {
@@ -528,18 +558,29 @@ const formatPrice = (price) => {
 };
 
 const formatRooms = (count) => {
-  if (count === 0) return 'Студия';
-  if (count > 6) return '6+';
-  if (count > 0 && count < 6) return `${count} комн.`;
-  return `${count}`;
+  if (count === 'студия') return 'Студия';
+  if (count === '6+') return '6+ комн.';
+  if (count === 'свободная планировка') return 'Своб. план.';
+  return `${count} комн.`;
 };
 
-const toggleFavorite = (index) => {
-  listings.value[index].isFavorited = !listings.value[index].isFavorited;
-  // Здесь можно добавить вызов API для сохранения в избранное
+
+const toggleFavorite = async (listingId, index) => {
+  try {
+    const response = await axios.post(`${thisUrl()}/favorites/toggle`, { realty_id: listingId });
+    listings.value[index].is_favorite = response.data.is_favorite;
+  } catch (err) {
+    console.error('Ошибка при изменении избранного:', err);
+  }
 };
 
-onMounted(fetchData);
+// Watchers
+watch(currentPage, fetchData);
+
+// Lifecycle hooks
+onMounted(() => {
+  fetchData();
+});
 </script>
 
 <style scoped>
