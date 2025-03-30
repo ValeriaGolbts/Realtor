@@ -211,4 +211,18 @@ class RealtyController extends Controller
             'rentTypes' => $rentTypes, //возвращение типа аренды
         ]);
     }
+
+    public function userRealty()
+    {
+        $user = Auth::user();
+
+        $listings = Realty::where('user_id', $user->id)
+            ->with(['typeRent', 'typeRealty', 'typeRepair'])
+            ->get();
+
+        return response()->json([
+            'listings' => $listings,
+            'success' => true
+        ]);
+    }
 }
