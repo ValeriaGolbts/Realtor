@@ -14,7 +14,7 @@ class UserController extends Controller
     public function profile()
     {
         $user = Auth::user();
-        return response()->json(['user', $user]);
+        return response()->json(['user' => $user]);
     }
 
 
