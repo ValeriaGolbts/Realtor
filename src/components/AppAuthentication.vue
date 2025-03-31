@@ -15,7 +15,6 @@
                   class="modal-input"
                   required
               />
-              <span v-if="emailError" class="error-message">Неправильный email или пароль</span>
             </div>
             <div class="input-wrapper" :class="{ 'error': passwordError }">
               <input
@@ -53,7 +52,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { thisUrl } from '../url.js';
 import Cookies from 'js-cookie';
-import '@/assets/fonts/fonts.css';
+
 const emit = defineEmits(['update:isOpen', 'go-to-register', 'go-to-policy', 'go-to-forgot-password', 'auth-success']);
 defineProps({
   isOpen: {
@@ -92,12 +91,12 @@ const signIn = async () => {
     const newToken = response.data.access_token;
     token.value = newToken;
     Cookies.set('authToken', newToken, {
-      expires: rememberPassword.value ? 30 : 1,
+      expires: rememberPassword.value ? 1 : 1,
       secure: true,
       sameSite: 'strict',
     });
     emit('auth-success', email.value);
-    closeModal();
+    closeModal(response.data.access_token);
     console.log(token);
   } catch (error) {
     console.error('Ошибка при авторизации:', error);
@@ -219,6 +218,7 @@ const logout = () => {
   font-weight: 300;
   font-size: 16px;
   color: #000;
+  margin-top: 25px;
 }
 
 .modal-checkbox label {

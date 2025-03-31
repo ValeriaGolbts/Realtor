@@ -1,28 +1,28 @@
 <template>
   <section>
-  <div class="img_footer">
-    <div>
-      <img src="./icons/TOMSK.svg">
-    </div>
-  </div>
-  <div class="footer">
-    <div class="nav">
-      <div class="links_footer">
-      <a>Длительная аренда</a>
-      <a>Недвижимость посуточно</a>
-      <a>Политика конфиденциальности</a>
-      </div>
-      <div class="icons">
-        <img src="./icons/icon_telegram.svg">
-        <img src="./icons/icon_vk.svg">
+    <div class="img_footer">
+      <div>
+        <img src="./icons/TOMSK.svg">
       </div>
     </div>
-    <div class="footer_contacts">
-      <div class="footer_email">TomskZone@mail.com</div>
-      <div class="footer_phone">8 (800) 111-11-11</div>
+    <div class="footer">
+      <div class="nav">
+        <div class="links_footer">
+          <a>Длительная аренда</a>
+          <a>Недвижимость посуточно</a>
+          <a>Политика конфиденциальности</a>
+        </div>
+        <div class="icons">
+          <img src="./icons/icon_telegram.svg">
+          <img src="./icons/icon_vk.svg">
+        </div>
+      </div>
+      <div class="footer_contacts">
+        <div class="footer_email">TomskZone@mail.com</div>
+        <div class="footer_phone">8 (800) 111-11-11</div>
+      </div>
+      <div class="idk">© 2011—2025 TomskZone</div>
     </div>
-    <div class="idk">© 2011—2025 TomskZone</div>
-  </div>
   </section>
 </template>
 
@@ -38,6 +38,7 @@ section{
   align-items: center;
   background-color: rgba(17, 17, 17, 1);
   justify-content: space-between;
+  padding-top: 50px;
 }
 .img_footer{
   margin-left: 160px;

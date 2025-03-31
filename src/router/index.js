@@ -42,7 +42,18 @@ const routes = [
     component: () => import('../components/AppAnnouncement.vue'),
     props: true  // Передаем параметры как props
   },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../components/AppProfile.vue'),
+  },
 
+  {
+    path: '/realty/:id/reviews',
+    name: 'RealtyReviews',
+    component: () => import('../components/RealtyReviews.vue'),
+    props: true
+  }
 ];
 
 const router = createRouter({
