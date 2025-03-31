@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="content-container">
-      <div class="title">Долгосрочная аренда 1-комн <br> и 2-комн квартир</div>
+      <div class="title">Долгосрочная <br>и посуточная аренда</div>
       <div class="adv">
         <span class="label">{{ totalItems }} ОБЪЯВЛЕНИЯ</span>
       </div>
@@ -595,7 +595,7 @@ onMounted(() => {
 .title {
   font-size: 40px;
   color: white;
-  margin-bottom: 6%;
+  margin-bottom: 2%;
 }
 
 .adv {
@@ -614,7 +614,7 @@ onMounted(() => {
 }
 
 .content-container {
-  margin-top: 10%;
+  margin-top: 6%;
   margin-right: 23px;
   margin-left: 23px;
 }

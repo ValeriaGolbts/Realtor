@@ -1,8 +1,8 @@
 <template>
-  <AppHeader :class="{ 'custom-header': isCustomHeader }"></AppHeader>
-  <main>
-    <router-view></router-view>
-  </main>
+<AppHeader :class="{ 'custom-header': isCustomHeader }"></AppHeader>
+<main>
+  <router-view></router-view>
+</main>
   <AppFooter v-if="showFooter" :class="{ 'custom-footer': isCustomFooter }" />
 </template>
 
@@ -13,6 +13,7 @@ import { ref, provide, watch } from 'vue';
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import { useRoute } from 'vue-router';
+import '@/assets/fonts/fonts.css';
 
 const route = useRoute();
 const headerBackground = ref('');
@@ -30,7 +31,7 @@ watch(route, (newRoute) => {
     isCustomHeader.value = true;
     isCustomFooter.value = true;
   }
-}, { immediate: true });
+}, { iammediate: true });
 watch(route, (newRoute) => {
   if (newRoute.path === '/') {
     isCustomHeader.value = true;
@@ -44,4 +45,9 @@ watch(route, (newRoute) => {
   left: -2%;
 }
 
+body{
+  margin: 0;
+  font-family: 'NotoSans', sans-serif;
+}
 </style>
+

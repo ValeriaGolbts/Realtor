@@ -11,17 +11,22 @@
       <div v-if="step === 1">
         <div class="section">
           <label for="rent-type" class="label">Тип аренды</label>
-          <select id="rent-type" class="select" v-model="form.type_rent_id">
+          <select id="rent-type" class="select" v-model="form.type_rent_id" @blur="validateField('type_rent_id')">
+            <option value="">Выберите тип аренды</option>
             <option v-for="option in rentTypeOptions" :key="option.id" :value="option.id">
               {{ option.title }}
             </option>
           </select>
+          <div class="error-message" v-if="errors.type_rent_id">{{ errors.type_rent_id }}</div>
+
           <label for="property-type" class="label">Тип недвижимости</label>
-          <select id="property-type" class="select" v-model="form.type_realty_id">
+          <select id="property-type" class="select" v-model="form.type_realty_id" @blur="validateField('type_realty_id')">
+            <option value="">Выберите тип недвижимости</option>
             <option v-for="option in propertyTypeOptions" :key="option.id" :value="option.id">
               {{ option.title }}
             </option>
           </select>
+          <div class="error-message" v-if="errors.type_realty_id">{{ errors.type_realty_id }}</div>
         </div>
 
         <!-- Параметры квартиры -->
@@ -29,17 +34,21 @@
           <h3 class="subtitle">Параметры квартиры</h3>
           <div class="form-group">
             <label for="rooms" class="label">Количество комнат</label>
-            <select id="rooms" class="select" v-model="form.count_rooms">
+            <select id="rooms" class="select" v-model="form.count_rooms" @blur="validateField('count_rooms')">
+              <option value="">Выберите количество комнат</option>
               <option v-for="option in roomOptions" :key="option" :value="option">{{ option }}</option>
             </select>
+            <div class="error-message" v-if="errors.count_rooms">{{ errors.count_rooms }}</div>
           </div>
           <div class="form-group">
             <label for="repair" class="label">Ремонт</label>
-            <select id="repair" class="select" v-model="form.repair_id">
+            <select id="repair" class="select" v-model="form.repair_id" @blur="validateField('repair_id')">
+              <option value="">Выберите тип ремонта</option>
               <option v-for="option in repairTypeOptions" :key="option.id" :value="option.id">
                 {{ option.title }}
               </option>
             </select>
+            <div class="error-message" v-if="errors.repair_id">{{ errors.repair_id }}</div>
           </div>
 
           <!-- Площади и этаж -->
@@ -53,9 +62,12 @@
                     class="input area"
                     placeholder="25"
                     v-model="form.total_square"
+                    @blur="validateField('total_square')"
+                    min="1"
                 />
                 <span class="unit">м²</span>
               </div>
+              <div class="error-message" v-if="errors.total_square">{{ errors.total_square }}</div>
             </div>
             <div class="form-group area">
               <label for="living-area" class="label">Жилая площадь</label>
@@ -66,9 +78,12 @@
                     class="input area"
                     placeholder="25"
                     v-model="form.living_square"
+                    @blur="validateField('living_square')"
+                    min="1"
                 />
                 <span class="unit">м²</span>
               </div>
+              <div class="error-message" v-if="errors.living_square">{{ errors.living_square }}</div>
             </div>
             <div class="form-group area">
               <label for="kitchen-area" class="label">Площадь кухни</label>
@@ -79,9 +94,12 @@
                     class="input area"
                     placeholder="25"
                     v-model="form.kitchen_square"
+                    @blur="validateField('kitchen_square')"
+                    min="1"
                 />
                 <span class="unit">м²</span>
               </div>
+              <div class="error-message" v-if="errors.kitchen_square">{{ errors.kitchen_square }}</div>
             </div>
           </div>
 
@@ -89,7 +107,16 @@
           <div class="form-group-row">
             <div class="form-group small">
               <label for="floor" class="label">Этаж</label>
-              <input id="floor" type="number" class="input small" placeholder="2" v-model="form.floor" />
+              <input
+                  id="floor"
+                  type="number"
+                  class="input small"
+                  placeholder="2"
+                  v-model="form.floor"
+                  @blur="validateField('floor')"
+                  min="0"
+              />
+              <div class="error-message" v-if="errors.floor">{{ errors.floor }}</div>
             </div>
             <div class="form-group small">
               <label for="year-built" class="label">Год постройки дома</label>
@@ -99,23 +126,44 @@
                   class="input small"
                   placeholder="1943"
                   v-model="form.year_construction"
+                  @blur="validateField('year_construction')"
+                  min="1800"
+                  :max="new Date().getFullYear()"
               />
+              <div class="error-message" v-if="errors.year_construction">{{ errors.year_construction }}</div>
             </div>
           </div>
           <!-- Адрес и цена -->
           <div class="form-group">
             <label for="address" class="label">Адрес</label>
-            <input id="address" type="text" class="input" placeholder="Адрес" v-model="form.address" />
+            <input
+                id="address"
+                type="text"
+                class="input"
+                placeholder="Адрес"
+                v-model="form.address"
+                @blur="validateField('address')"
+            />
+            <div class="error-message" v-if="errors.address">{{ errors.address }}</div>
           </div>
           <div class="form-group">
             <label for="price" class="label">Цена</label>
-            <input id="price" type="number" class="input" placeholder="Цена" v-model="form.price" />
+            <input
+                id="price"
+                type="number"
+                class="input"
+                placeholder="Цена"
+                v-model="form.price"
+                @blur="validateField('price')"
+                min="1"
+            />
+            <div class="error-message" v-if="errors.price">{{ errors.price }}</div>
           </div>
         </div>
         <!-- Кнопки -->
         <div class="actions">
           <!-- Кнопка "Продолжить", переход на следующий шаг -->
-          <button @click.prevent="nextStep" class="button primary">Продолжить</button>
+          <button @click.prevent="validateStep1" class="button primary">Продолжить</button>
           <!-- Кнопка "Сохранить и выйти" -->
           <button @click.prevent="saveAndExit" class="button secondary">Сохранить и выйти</button>
         </div>
@@ -141,6 +189,7 @@
                 <button @click="openFileSelector">ДОБАВИТЬ</button>
               </div>
             </div>
+            <div class="error-message" v-if="errors.photos">{{ errors.photos }}</div>
           </div>
         </div>
 
@@ -151,13 +200,13 @@
               class="textarea"
               placeholder="Расскажите, что есть в квартире и рядом с домом, опишите состояние жилья."
               v-model="form.description"
+              @blur="validateField('description')"
           ></textarea>
+          <div class="error-message" v-if="errors.description">{{ errors.description }}</div>
         </div>
         <div class="actions">
           <!-- Кнопка "Опубликовать", отправка данных на сервер -->
-          <button @click.prevent="publishAd" class="button primary">Опубликовать</button>
-          <!-- Кнопка "Сохранить и выйти" -->
-          <button @click.prevent="saveAndExit" class="button secondary">Сохранить и выйти</button>
+          <button @click.prevent="validateAndPublish" class="button primary">Опубликовать</button>
         </div>
       </div>
     </div>
@@ -166,16 +215,14 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import axios from 'axios'; // Импортируем Axios для HTTP запросов
-import { thisUrl } from '../url.js'; // Путь к файлу с URL API
-import Cookies from 'js-cookie'; // Импортируем js-cookie для работы с куками
+import axios from 'axios';
+import { thisUrl } from '../url.js';
+import Cookies from 'js-cookie';
 
-// ref для управления текущим шагом формы
 const step = ref(1);
-// ref для доступа к элементу input type="file"
 const photoInput = ref(null);
 
-// reactive для хранения данных формы
+// Основная форма
 const form = reactive({
   type_rent_id: '',
   type_realty_id: '',
@@ -188,58 +235,140 @@ const form = reactive({
   floor: '',
   repair_id: '',
   year_construction: '',
-  image: null,
   description: '',
   photos: [],
-
-  rent_price: '',
-  deposit: '',
-  utilities_payer: '',
-  other_utilities_payer: '',
-  rent_duration: '',
-  can_have_children: false,
-  can_have_pets: false,
-  can_smoke: false,
-  contact_name: '',
-  contact_phone: '',
 });
 
-// ref для хранения опций для select-ов
+// Ошибки валидации
+const errors = reactive({
+  type_rent_id: '',
+  type_realty_id: '',
+  address: '',
+  price: '',
+  count_rooms: '',
+  total_square: '',
+  living_square: '',
+  kitchen_square: '',
+  floor: '',
+  repair_id: '',
+  year_construction: '',
+  description: '',
+  photos: '',
+});
+
+// Опции для селектов
 const rentTypeOptions = ref([]);
 const propertyTypeOptions = ref([]);
 const repairTypeOptions = ref([]);
 const roomOptions = ref(['студия', '1', '2', '3', '4', '5', '6+', 'свободная планировка']);
 
+// Правила валидации для каждого поля
+const validationRules = {
+  type_rent_id: (value) => !value ? 'Выберите тип аренды' : '',
+  type_realty_id: (value) => !value ? 'Выберите тип недвижимости' : '',
+  count_rooms: (value) => !value ? 'Укажите количество комнат' : '',
+  repair_id: (value) => !value ? 'Выберите тип ремонта' : '',
+  total_square: (value) => {
+    if (!value) return 'Укажите общую площадь';
+    if (isNaN(value) || value <= 0) return 'Площадь должна быть положительным числом';
+    return '';
+  },
+  living_square: (value) => {
+    if (!value) return 'Укажите жилую площадь';
+    if (isNaN(value) || value <= 0) return 'Площадь должна быть положительным числом';
+    if (parseFloat(value) > parseFloat(form.total_square)) return 'Жилая площадь не может быть больше общей';
+    return '';
+  },
+  kitchen_square: (value) => {
+    if (!value) return 'Укажите площадь кухни';
+    if (isNaN(value) || value <= 0) return 'Площадь должна быть положительным числом';
+    if (parseFloat(value) > parseFloat(form.total_square)) return 'Площадь кухни не может быть больше общей';
+    return '';
+  },
+  floor: (value) => {
+    if (!value && value !== 0) return 'Укажите этаж';
+    if (isNaN(value) || value < 0) return 'Этаж должен быть неотрицательным числом';
+    return '';
+  },
+  year_construction: (value) => {
+    if (!value) return 'Укажите год постройки';
+    if (isNaN(value) || value < 1800 || value > new Date().getFullYear())
+      return `Год должен быть между 1800 и ${new Date().getFullYear()}`;
+    return '';
+  },
+  address: (value) => !value ? 'Укажите адрес' : '',
+  price: (value) => {
+    if (!value) return 'Укажите цену';
+    if (isNaN(value) || value <= 0) return 'Цена должна быть положительным числом';
+    return '';
+  },
+  description: (value) => {
+    if (!value) return 'Напишите описание';
+    if (value.length < 30) return 'Описание должно содержать минимум 30 символов';
+    return '';
+  },
+  photos: (value) => value.length === 0 ? 'Добавьте хотя бы одно фото' : '',
+};
 
-// Функция для получения данных с сервера (типы недвижимости, типы ремонта и т.д.)
+// Валидация конкретного поля
+const validateField = (fieldName) => {
+  const value = form[fieldName];
+  errors[fieldName] = validationRules[fieldName](value);
+};
+
+// Валидация всех полей шага 1
+const validateStep1 = () => {
+  const step1Fields = [
+    'type_rent_id', 'type_realty_id', 'count_rooms', 'repair_id',
+    'total_square', 'living_square', 'kitchen_square',
+    'floor', 'year_construction', 'address', 'price'
+  ];
+
+  let isValid = true;
+
+  step1Fields.forEach(field => {
+    validateField(field);
+    if (errors[field]) isValid = false;
+  });
+
+  if (isValid) {
+    nextStep();
+  }
+};
+
+// Валидация всех полей перед публикацией
+const validateAndPublish = () => {
+  validateField('description');
+  validateField('photos');
+
+  if (!errors.description && !errors.photos) {
+    publishAd();
+  }
+};
+
+// Получение данных с сервера
 const fetchData = async () => {
   try {
     const response = await axios.get(`${thisUrl()}/realty/filter`);
-    console.log('Data from API:', response.data);
-
     setSelectOptions(response.data);
   } catch (error) {
     console.error('Fetching data error:', error);
   }
 };
 
-// Функция для установки опций для select-ов
+// Установка опций для селектов
 const setSelectOptions = (data) => {
   propertyTypeOptions.value = data.propertyTypes;
   rentTypeOptions.value = data.rentTypes;
   repairTypeOptions.value = data.renovationTypes;
-  console.log(rentTypeOptions.value);
 };
 
-// Функция для открытия файлового менеджера
+// Открытие файлового менеджера
 const openFileSelector = () => {
   photoInput.value.click();
 };
 
-// Вызываем fetchData при монтировании компонента
-onMounted(fetchData);
-
-// Методы для навигации по шагам
+// Навигация по шагам
 const nextStep = () => {
   step.value = 2;
 };
@@ -248,37 +377,47 @@ const prevStep = () => {
   step.value = 1;
 };
 
-// Функция для добавления фотографии в массив form.photos
+// Работа с фотографиями
 const addPhoto = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      form.photos.push(e.target.result);
-    };
-    reader.readAsDataURL(file);
+  const files = event.target.files;
+  if (files && files.length > 0) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          form.photos.push(e.target.result);
+          validateField('photos');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
   }
 };
 
-// Функции для работы с фотографиями (заглушки)
 const setMainPhoto = (index) => {
-  console.log('Set main photo', index);
+  if (index > 0) {
+    const photo = form.photos.splice(index, 1)[0];
+    form.photos.unshift(photo);
+  }
 };
 
 const rotatePhoto = (index) => {
   console.log('Rotate photo', index);
+  // Здесь должна быть реализация поворота фото
 };
 
 const removePhoto = (index) => {
   form.photos.splice(index, 1);
+  validateField('photos');
 };
 
-// Функция для отправки данных на сервер
+// Публикация объявления
 const publishAd = async () => {
   try {
     const formData = new FormData();
 
-    // Добавляем все текстовые поля
+    // Добавляем текстовые поля
     Object.entries(form).forEach(([key, value]) => {
       if (key !== 'photos' && value !== null) {
         formData.append(key, value);
@@ -289,9 +428,8 @@ const publishAd = async () => {
     if (form.photos && form.photos.length > 0) {
       form.photos.forEach((photo, index) => {
         if (photo instanceof File) {
-          formData.append('images[]', photo); // Отправляем как массив файлов
+          formData.append('images[]', photo);
         } else if (typeof photo === 'string' && photo.startsWith('data:image')) {
-          // Конвертируем base64 в Blob
           const byteString = atob(photo.split(',')[1]);
           const mimeString = photo.split(',')[0].split(':')[1].split(';')[0];
           const ab = new ArrayBuffer(byteString.length);
@@ -315,6 +453,7 @@ const publishAd = async () => {
     });
 
     console.log('Success:', response.data);
+    // Здесь можно добавить редирект или сообщение об успехе
 
   } catch (error) {
     console.error('Error:', error);
@@ -324,15 +463,13 @@ const publishAd = async () => {
     }
   }
 };
-// Функция для сохранения данных и выхода (заглушка)
-const saveAndExit = () => {
-  console.log('Save and exit');
-  // Здесь должен быть код для сохранения данных и перенаправления пользователя
-};
+
+
+onMounted(fetchData);
 </script>
 
 <style scoped>
-/* Стили для компонента (оставлены без изменений) */
+/* Основные стили остаются без изменений */
 .container {
   display: flex;
   background-color: rgba(242, 240, 238, 1);
@@ -359,6 +496,9 @@ const saveAndExit = () => {
   margin-bottom: 15px;
 }
 
+#rent-type{
+  margin-bottom: 2%;
+}
 .section {
   margin-bottom: 30px;
 }
@@ -377,18 +517,6 @@ const saveAndExit = () => {
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
-  max-width: 650px;
-}
-
-.checkbox-group h4 {
-  margin: 5px 0;
-  font-size: 18px;
-}
-
-.checkbox-group label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
 }
 
 .actions {
@@ -435,7 +563,6 @@ const saveAndExit = () => {
   width: 100%;
 }
 
-/* Стили для полей с площадью */
 .form-group.area {
   flex: 1;
   position: relative;
@@ -462,7 +589,6 @@ const saveAndExit = () => {
   color: black;
 }
 
-/* Стили для второго этапа (фотографии и описание) */
 .photo-upload {
   margin-bottom: 20px;
 }
@@ -529,5 +655,18 @@ const saveAndExit = () => {
   margin-bottom: 20px;
   color: #007bff;
   text-decoration: none;
+}
+
+/* Стили для сообщений об ошибках */
+.error-message {
+  color: #ff0000;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.input.error,
+.select.error,
+.textarea.error {
+  border-color: #ff0000;
 }
 </style>

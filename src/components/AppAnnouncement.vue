@@ -2,59 +2,78 @@
   <div class="app">
     <main class="main-content">
       <section class="apartment-details">
-        <div class="image-gallery">
-          <img :src="currentImage" alt="Main Apartment Image" class="main-image" />
-          <div class="thumbnails">
+        <!-- Галерея изображений -->
+        <div class="image-gallery-container">
+          <div class="main-image-wrapper">
             <img
-                v-for="(image, index) in apartment.images"
-                :key="index"
-                :src="image"
-                alt="Apartment Image"
-                class="thumbnail"
-                :class="{ active: currentImage === image }"
-                @click="selectImage(image)"
+                :src="currentImage || defaultImage"
+                alt="Apartment photo"
+                class="main-image"
+                @error="handleImageError"
             />
+          </div>
+
+          <div class="thumbnails-scroll-container">
+            <div class="thumbnails-wrapper">
+              <div
+                  v-for="(image, index) in apartment.images"
+                  :key="index"
+                  class="thumbnail-container"
+                  @click="selectImage(image)"
+              >
+                <img
+                    :src="image || defaultImage"
+                    alt="Thumbnail"
+                    class="thumbnail"
+                    :class="{ 'active-thumbnail': currentImage === image }"
+                    @error="handleThumbnailError(index)"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="details">
-          <div class="rating">
-            <span>{{ apartment.rating }}</span>
-            <span v-for="i in 5" :key="i">⭐</span>
-          </div>
-          <div class="price">
-            {{ formattedPrice }} ₽ / мес
-            <span class="old-price" v-if="apartment.old_price">{{ formattedOldPrice }} ₽</span>
-          </div>
-          <div class="address">
-            {{ apartment.count_rooms }} комн. {{ apartment.total_square }} м² {{ apartment.floor }}/{{ apartment.max_floor }} эт.
-          </div>
-          <div class="address-text">{{ formattedAddress }}</div>
-          <button class="show-phone-button" @click="togglePhone">
-            {{ showPhone ? apartment.contact_phone : 'Показать номер телефона' }}
-          </button>
-          <div class="author">
-            <img :src="apartment.author?.avatar" alt="Author Avatar" class="author-avatar" />
-            <span>{{ apartment.author?.name }}</span>
-          </div>
-          <button v-if="isOwner" @click="editApartment" class="edit-btn">Редактировать</button>
-          <button v-if="isOwner" @click="deleteApartment" class="delete-btn">Удалить</button>
-        </div>
-      </section>
+          <div class="detail">
+            <div class="rating">
+              <span>{{ apartment.rating || 'Нет оценок' }}</span>
+              <span v-for="i in 5" :key="i">⭐</span>
+            </div>
+            <div class="price">
+              {{ formattedPrice }} ₽ / мес
+              <span class="old-price" v-if="apartment.old_price">{{ formattedOldPrice }} ₽</span>
+            </div>
 
-      <section class="amenities">
-        <h2>Условия проживания</h2>
-        <ul>
-          <li>Оплата КЖК: {{ apartment.payment || 'Не указано' }}</li>
-          <li>Залог: {{ apartment.deposit || 'Не указано' }}</li>
-          <li>Срок аренды: {{ apartment.rental_period || 'Не указано' }}</li>
-          <li>Условия проживания:
-            <span v-if="apartment.can_have_children">Можно с детьми, </span>
-            <span v-if="apartment.can_have_pets">Можно с животными, </span>
-            <span v-if="apartment.can_smoke">Можно курить</span>
-            <span v-if="!apartment.can_have_children && !apartment.can_have_pets && !apartment.can_smoke">Не указано</span>
-          </li>
-        </ul>
+            <div class="details-grid">
+              <div class="detail-item">
+                <div>{{ apartment.count_rooms }} комн.</div>
+                <div class="detail-label">{{ apartment.type_realty?.title || 'Тип не указан' }}</div>
+              </div>
+              <div class="detail-item">
+                <div>{{ apartment.total_square }}</div>
+                <div class="detail-label">общая пл</div>
+              </div>
+              <div class="detail-item">
+                <div>{{ apartment.floor }}/{{ apartment.max_floor }}</div>
+                <div class="detail-label">этаж</div>
+              </div>
+            </div>
+
+            <div class="address-text">{{ apartment.address || 'Адрес не указан' }}</div>
+            <button class="show-phone-button" @click="togglePhone">
+              {{ showPhone ? apartment.contact_phone : 'Показать номер телефона' }}
+            </button>
+          </div>
+
+          <div class="author">
+            <img
+                :src="apartment.user?.avatar"
+                alt="Author"
+                class="author-avatar"
+            />
+            <span>{{ apartment.user?.name || 'Автор не указан' }}</span>
+          </div>
+        </div>
       </section>
 
       <section class="description">
@@ -65,28 +84,17 @@
       <section class="general-info">
         <h2>Общая информация</h2>
         <ul>
+          <li>Тип аренды: {{ apartment.type_rent?.title || 'Не указано' }}</li>
+          <li>Тип недвижимости: {{ apartment.type_realty?.title || 'Не указано' }}</li>
           <li>Кол-во комнат: {{ apartment.count_rooms || 'Не указано' }}</li>
           <li>Общая площадь: {{ apartment.total_square || 'Не указано' }} м²</li>
           <li>Жилая площадь: {{ apartment.living_square || 'Не указано' }} м²</li>
           <li>Площадь кухни: {{ apartment.kitchen_square || 'Не указано' }} м²</li>
           <li>Балкон/лоджия: {{ apartment.balcony ? 'Есть' : 'Нет' }}</li>
-          <li>Ремонт: {{ apartment.repair_type || 'Не указано' }}</li>
+          <li>Ремонт: {{ apartment.type_repair?.title || 'Не указано' }}</li>
           <li>Этаж: {{ apartment.floor || 'Не указано' }}</li>
           <li>Год постройки дома: {{ apartment.year_construction || 'Не указано' }}</li>
         </ul>
-      </section>
-
-      <section class="map">
-        <h2>Расположение на карте</h2>
-        <div class="map-container" ref="mapContainer"></div>
-      </section>
-
-      <section class="available-items">
-        <h2>В квартире есть</h2>
-        <ul v-if="apartment.amenities && apartment.amenities.length">
-          <li v-for="(item, index) in apartment.amenities" :key="index">{{ item }}</li>
-        </ul>
-        <p v-else>Информация о доступных предметах отсутствует</p>
       </section>
     </main>
   </div>
@@ -102,37 +110,35 @@ const route = useRoute();
 const router = useRouter();
 const apartmentId = route.params.id;
 
+// Дефолтные изображения
+const defaultImage = ref('/images/default-apartment.jpg');
+const defaultAvatar = ref('/images/default-avatar.jpg');
+
 // Состояние компонента
 const apartment = ref({
   id: null,
   images: [],
   price: 0,
-  old_price: 0,
-  count_rooms: 0,
+  old_price: null,
+  count_rooms: '',
   total_square: 0,
   living_square: 0,
   kitchen_square: 0,
   floor: 0,
   max_floor: 0,
   address: '',
-  rating: 0,
+  rating: null,
   contact_phone: '',
-  author: {
-    id: null,
-    avatar: '',
-    name: '',
-  },
   payment: '',
   deposit: '',
   rental_period: '',
-  can_have_children: false,
-  can_have_pets: false,
-  can_smoke: false,
   description: '',
-  repair_type: '',
   balcony: false,
   year_construction: 0,
-  amenities: []
+  type_rent: null,
+  type_realty: null,
+  type_repair: null,
+  user: null
 });
 
 const currentImage = ref('');
@@ -145,68 +151,72 @@ const formattedPrice = computed(() => {
 });
 
 const formattedOldPrice = computed(() => {
-  return new Intl.NumberFormat('ru-RU').format(apartment.value.old_price);
-});
-
-const formattedAddress = computed(() => {
-  return apartment.value.address || 'Адрес не указан';
+  return apartment.value.old_price ? new Intl.NumberFormat('ru-RU').format(apartment.value.old_price) : '';
 });
 
 // Методы
 const fetchApartmentData = async () => {
   try {
-    const response = await axios.get(`${thisUrl()}/show/${apartmentId}`);
-    apartment.value = response.data;
+    const response = await axios.get(`${thisUrl()}/realty/filter`, {
+      params: {
+        id: apartmentId
+      }
+    });
 
-    // Устанавливаем первое изображение как текущее
-    if (apartment.value.images?.length) {
-      currentImage.value = apartment.value.images[0];
+    // Находим нужное объявление (так как /filter возвращает массив)
+    const listing = response.data.listings.find(item => item.id == apartmentId);
+
+    if (listing) {
+      apartment.value = listing;
+
+      // Обрабатываем изображения
+      if (Array.isArray(apartment.value.images)) {
+        currentImage.value = apartment.value.images[0] || defaultImage.value;
+      } else {
+        apartment.value.images = [];
+        currentImage.value = defaultImage.value;
+      }
+
+      // Проверяем владельца
+      const userId = localStorage.getItem('userId');
+      isOwner.value = userId && apartment.value.user_id === parseInt(userId);
+    } else {
+      router.push('/not-found');
     }
-
-    // Проверяем, является ли текущий пользователь владельцем
-    const userId = localStorage.getItem('userId');
-    isOwner.value = userId && apartment.value.author?.id === parseInt(userId);
   } catch (error) {
-    console.error('Ошибка при загрузке данных об квартире:', error);
+    console.error('Ошибка при загрузке данных:', error);
     router.push('/not-found');
   }
 };
 
 const selectImage = (image) => {
-  currentImage.value = image;
+  currentImage.value = image || defaultImage.value;
 };
 
 const togglePhone = () => {
   showPhone.value = !showPhone.value;
 };
 
-const editApartment = () => {
-  router.push(`/create_announ/${apartmentId}`);
+// Обработчики ошибок изображений
+const handleImageError = () => {
+  currentImage.value = defaultImage.value;
 };
 
-const deleteApartment = async () => {
-  try {
-    await axios.delete(`${thisUrl()}/realty/delete/${apartmentId}`);
-    router.push('/filters-search');
-  } catch (error) {
-    console.error('Ошибка при удалении объявления:', error);
-  }
+const handleThumbnailError = (index) => {
+  apartment.value.images[index] = defaultImage.value;
 };
 
-// Хуки жизненного цикла
+
 onMounted(() => {
   fetchApartmentData();
 });
 </script>
 
 <style scoped>
-/* Общие стили */
+/* Стили остаются без изменений */
 .app {
-  font-family: Arial, sans-serif;
-  max-width: 1200px;
   margin: 0 auto;
-  color: #333;
-  background-color: #f9f9f9;
+  max-width: 1200px;
   padding: 20px;
 }
 
@@ -214,12 +224,24 @@ onMounted(() => {
   background-color: white;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 10%;
 }
 
-/* Галерея изображений */
-.image-gallery {
+.apartment-details {
+  display: flex;
+  gap: 20px;
   margin-bottom: 30px;
+}
+
+.image-gallery-container {
+  flex: 1;
+  min-width: 0;
+}
+
+.main-image-wrapper {
+  position: relative;
+  margin-bottom: 10px;
 }
 
 .main-image {
@@ -227,94 +249,138 @@ onMounted(() => {
   height: 400px;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 10px;
 }
 
-.thumbnails {
+.thumbnails-scroll-container {
+  overflow-x: auto;
+}
+
+.thumbnails-wrapper {
   display: flex;
   gap: 10px;
-  overflow-x: auto;
   padding-bottom: 10px;
 }
 
-.thumbnail {
-  width: 100px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 4px;
+.thumbnail-container {
   cursor: pointer;
-  border: 2px solid transparent;
 }
 
-.thumbnail.active {
+.thumbnail {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.active-thumbnail {
   border-color: #ff6600;
 }
 
-/* Детали квартиры */
 .details {
-  background-color: #2c3e50;
-  color: white;
-  padding: 20px;
+  flex: 1;
+  min-width: 300px;
+}
+
+.detail {
+  background-color: black;
   border-radius: 8px;
-  margin-bottom: 30px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
 }
 
 .rating {
-  font-size: 16px;
   margin-bottom: 10px;
 }
 
 .price {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
 }
 
 .old-price {
   text-decoration: line-through;
-  color: #bdc3c7;
+  color: #6c757d;
   margin-left: 10px;
-  font-size: 18px;
+  font-size: 16px;
 }
 
-.address {
-  font-size: 16px;
-  margin-bottom: 5px;
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.detail-item {
+  text-align: center;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #6c757d;
+  margin-top: 5px;
 }
 
 .address-text {
-  margin: 10px 0;
-  font-size: 14px;
+  margin: 15px 0;
+  font-size: 16px;
 }
 
 .show-phone-button {
+  width: 100%;
+  padding: 10px;
   background-color: #ff6600;
   color: white;
   border: none;
-  padding: 10px 15px;
   border-radius: 4px;
-  cursor: pointer;
   font-weight: bold;
-  margin: 10px 0;
-  width: 100%;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.owner-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn, .delete-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
 }
 
 .author {
   display: flex;
   align-items: center;
-  margin-top: 15px;
+  gap: 10px;
   padding-top: 15px;
-  border-top: 1px solid #34495e;
+  border-top: 1px solid #dee2e6;
 }
 
 .author-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-right: 10px;
+  object-fit: cover;
 }
 
-/* Секции с информацией */
 section {
   margin-bottom: 30px;
 }
@@ -322,7 +388,7 @@ section {
 h2 {
   font-size: 20px;
   margin-bottom: 15px;
-  color: #2c3e50;
+  color: #343a40;
 }
 
 ul {
@@ -343,96 +409,13 @@ li:before {
   left: 0;
 }
 
-/* Карта */
-.map-container {
-  height: 400px;
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* Похожие объявления */
-.similar-listings {
-  margin-top: 40px;
-}
-
-.listings-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.listing-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.3s, box-shadow 0.3s;
-  cursor: pointer;
-  position: relative;
-}
-
-.listing-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.listing-image {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-
-.listing-details {
-  padding: 15px;
-}
-
-.listing-price {
-  font-weight: bold;
-  font-size: 18px;
-  margin-bottom: 5px;
-}
-
-.listing-info {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 5px;
-}
-
-.listing-address {
-  font-size: 14px;
-  color: #777;
-}
-
-.favorite-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 20px;
-  color: #aaa;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.favorite-icon.favorited {
-  color: #ff6600;
-}
-
-/* Адаптивность */
 @media (max-width: 768px) {
   .apartment-details {
     flex-direction: column;
   }
 
-  .image-gallery, .details {
-    width: 100%;
-  }
-
-  .main-image {
-    height: 300px;
-  }
-
-  .listings-container {
-    grid-template-columns: 1fr;
+  .details-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 </style>
