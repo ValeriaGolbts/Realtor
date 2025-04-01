@@ -14,26 +14,6 @@
         <div>на квартиры, дома и другие варианты</div>
       </div>
     </div>
-    <div class="filter-container">
-      <div class="filter">
-        <select name="type">
-          <option value="">Вид</option>
-          <option value="apartment">Квартира</option>
-          <option value="house">Дом</option>
-        </select>
-        <div class="border"></div>
-        <select name="rooms">
-          <option value="">Кол-во комнат</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-        </select>
-        <div class="border"></div>
-        <input type="text" name="price" placeholder="Цена до, ₽ в месяц">
-        <div class="border"></div>
-        <input type="text" name="address" placeholder="Адрес, район, улица">
-      </div>
-      <button>НАЙТИ</button>
-    </div>
     </section>
     <div class="main">
       <p>ОСОБЕННОСТИ СЕРВИСА</p>
