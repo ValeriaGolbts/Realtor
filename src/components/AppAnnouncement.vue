@@ -2,7 +2,6 @@
   <div class="container">
     <div class="content-container">
       <section class="apartment-details">
-        <!-- Галерея изображений -->
         <div class="image-gallery-container">
           <div class="main-image-wrapper">
             <img
@@ -36,8 +35,10 @@
         <div class="details">
           <div class="detail">
             <div class="rating">
-              <span>{{ apartment.rating || 'Нет оценок' }}</span>
-              <span v-for="i in 5" :key="i">⭐</span>
+              <div>
+                <span>{{ averageRating.toFixed(1) || 'Нет оценок' }}</span>
+                <span v-for="i in 5" :key="i" :class="{ 'filled': i <= Math.round(averageRating) }">⭐</span>
+              </div>
               <a href="#" class="leave-review-link" @click.prevent="openReviewModal">Оставить отзыв</a>
             </div>
             <div class="price">
@@ -96,6 +97,49 @@
           <li>Год постройки дома: {{ apartment.year_construction || 'Не указано' }}</li>
         </ul>
       </section>
+
+      <section class="reviews-section">
+        <div class="reviews-header">
+          <h2>Отзывы о квартире</h2>
+          <div class="rating-summary">
+            <div class="average-rating">
+              <span>Средняя оценка:</span>
+              <div class="stars">
+                <span v-for="i in 5" :key="i" :class="{ 'filled': i <= Math.round(averageRating) }">★</span>
+              </div>
+              <span class="rating-value">{{ averageRating.toFixed(1) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="reviews-list">
+          <div v-for="review in apartment.reviews" :key="review.id" class="review-item">
+            <div class="review-header">
+              <div class="review-author">
+                <span>{{ review.user.name }}</span>
+              </div>
+              <div class="review-actions">
+                <button
+                    v-if="isReviewAuthor(review.user.id)"
+                    @click="deleteReview(review.id)"
+                    class="delete-review-btn"
+                >
+                  Удалить
+                </button>
+              </div>
+            </div>
+            <div class="review-rating">
+              <span v-for="i in review.rating" :key="i" class="filled">★</span>
+              <span v-for="i in (5 - review.rating)" :key="'empty-'+i" class="empty">★</span>
+            </div>
+            <p class="review-text">{{ review.comment }}</p>
+          </div>
+
+          <div v-if="apartment.reviews && apartment.reviews.length === 0" class="no-reviews">
+            Пока нет отзывов. Будьте первым!
+          </div>
+        </div>
+      </section>
     </div>
     <ReviewModal
         v-if="apartment.id"
@@ -112,16 +156,16 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { thisUrl } from '../url.js';
-import ReviewModal from '/src/components/AppReviews.vue'
+import Cookies from 'js-cookie';
+import ReviewModal from '/src/components/AppReviews.vue';
 
 const route = useRoute();
 const router = useRouter();
 const apartmentId = route.params.id;
 const reviewModalOpen = ref(false);
-// Дефолтные изображения
 const defaultImage = ref('/images/default-apartment.jpg');
+const currentUserId = ref(Cookies.get('userId'));
 
-// Состояние компонента
 const apartment = ref({
   id: null,
   images: [],
@@ -140,18 +184,29 @@ const apartment = ref({
   type_rent: null,
   type_realty: null,
   type_repair: null,
+  reviews: []
 });
 
 const currentImage = ref('');
 const showPhone = ref(false);
 const isOwner = ref(false);
 
-// Форматированные значения
 const formattedPrice = computed(() => {
   return new Intl.NumberFormat('ru-RU').format(apartment.value.price);
 });
 
+const averageRating = computed(() => {
+  if (!apartment.value.reviews || apartment.value.reviews.length === 0) {
+    return 0;
+  }
+  const sum = apartment.value.reviews.reduce((acc, review) => acc + review.rating, 0);
+  return sum / apartment.value.reviews.length;
+});
 
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString('ru-RU', options);
+};
 
 const openReviewModal = () => {
   reviewModalOpen.value = true;
@@ -161,24 +216,25 @@ const handleReviewSubmitted = () => {
   fetchApartmentData();
 };
 
-// Методы
 const fetchApartmentData = async () => {
   try {
-    // Используем endpoint для получения конкретной квартиры
     const response = await axios.get(`${thisUrl()}/realty/show/${apartmentId}`);
 
     if (response.data) {
       apartment.value = response.data;
 
-      // Проверяем наличие изображений
       if (Array.isArray(apartment.value.images) && apartment.value.images.length > 0) {
         currentImage.value = apartment.value.images[0];
       } else {
         currentImage.value = defaultImage.value;
       }
 
-      // Логируем полученные данные для отладки
-      console.log('Данные квартиры:', response.data);
+      if (!apartment.value.reviews) {
+        const reviewsResponse = await axios.get(`${thisUrl()}/feedback/outputFeedback/${apartmentId}`);
+        apartment.value.reviews = reviewsResponse.data.feedbacks || [];
+      }
+
+      apartment.value.rating = averageRating.value;
     } else {
       router.push('/not-found');
     }
@@ -188,17 +244,34 @@ const fetchApartmentData = async () => {
   }
 };
 
-// Переключение видимости телефона
-const togglePhone = () => {
-  showPhone.value = !showPhone.value;
+const isReviewAuthor = (reviewUserId) => {
+  return currentUserId.value && parseInt(currentUserId.value) === reviewUserId;
+};
 
-  // Можно добавить логирование для отладки
-  if (showPhone.value) {
-    console.log('Показан телефон:', apartment.value.user?.phone);
+const deleteReview = async (reviewId) => {
+  try {
+    const token = Cookies.get('authToken');
+    if (!token) {
+      alert('Необходима авторизация');
+      return;
+    }
+
+    if (confirm('Вы уверены, что хотите удалить этот отзыв?')) {
+      await axios.delete(`${thisUrl()}/feedback/delete/${reviewId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      await fetchApartmentData();
+    }
+  } catch (error) {
+    console.error('Ошибка при удалении отзыва:', error);
+    alert('Не удалось удалить отзыв');
   }
 };
 
-
+const togglePhone = () => {
+  showPhone.value = !showPhone.value;
+};
 
 onMounted(() => {
   fetchApartmentData();
@@ -206,10 +279,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
-main{
+main {
   background-color: rgba(242, 240, 238, 1);
 }
-/* Стили остаются без изменений */
+
 .container {
   display: flex;
   background-color: rgba(242, 240, 238, 1);
@@ -270,9 +343,11 @@ main{
 .active-thumbnail {
   border-color: #ff6600;
 }
-.data{
+
+.data {
   font-size: 21px;
 }
+
 .details {
   flex: 1;
   width: 790px;
@@ -286,7 +361,6 @@ main{
   color: white;
   height: 449px;
 }
-
 
 .price {
   font-size: 24px;
@@ -342,30 +416,6 @@ main{
   font-size: 13px;
 }
 
-.owner-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.edit-btn, .delete-btn {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.edit-btn {
-  background-color: #28a745;
-  color: white;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
 .author {
   display: flex;
   align-items: center;
@@ -402,10 +452,16 @@ li {
 }
 
 .rating {
-  margin-bottom: 7%;
+  margin-bottom: 3%;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
+}
+
+.rating div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .leave-review-link {
@@ -416,6 +472,122 @@ li {
 
 .leave-review-link:hover {
   text-decoration: underline;
+}
+
+.reviews-section {
+  margin-top: 40px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 25px;
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.reviews-header h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.rating-summary {
+  display: flex;
+  align-items: center;
+}
+
+.average-rating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stars {
+  color: #ccc;
+  font-size: 18px;
+}
+
+.stars .filled {
+  color: #FF784F;
+}
+
+.rating-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.reviews-list {
+  margin-top: 20px;
+}
+
+.review-item {
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.delete-review-btn {
+  background: none;
+  border: none;
+  color: #ff4a2b;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 5px;
+}
+
+.delete-review-btn:hover {
+  text-decoration: underline;
+}
+
+.review-date {
+  color: #666;
+  font-size: 14px;
+}
+
+.review-rating {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.review-rating .filled {
+  color: #FF784F;
+}
+
+.review-rating .empty {
+  color: #ccc;
+}
+
+.review-text {
+  line-height: 1.5;
+  margin: 0;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 20px;
+  color: #666;
 }
 
 @media (max-width: 768px) {
