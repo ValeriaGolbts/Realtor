@@ -59,7 +59,9 @@ import {thisUrl} from '../url.js'
 import ActiveListings from './ActiveListings.vue'
 import Favorites from './Favorities.vue'
 import EditProfile from './EditProfile.vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const activeMenu = ref('listings')
 const currentComponent = shallowRef(ActiveListings)
 const user = ref({
@@ -87,9 +89,14 @@ onMounted(async () => {
       patronymic: response.data.user.patronymic || '',
       phone: response.data.user.phone || ''
     }
+
+    if (route.query.tab === 'edit-profile') {
+      activeMenu.value = 'edit-profile'
+    } else if (route.query.tab === 'favorites') {
+      activeMenu.value = 'favorites'
+    }
   } catch (err) {
     error.value = err.response?.data?.message || 'Не удалось загрузить данные пользователя'
-    console.error('Ошибка при запросе профиля:', err) // Добавьте логирование
   }
 })
 

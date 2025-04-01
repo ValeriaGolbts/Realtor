@@ -49,7 +49,7 @@ const routes = [
   },
 
   {
-    path: '/realty/:id/reviews',
+    path: '/reviews/:realtyId',
     name: 'RealtyReviews',
     component: () => import('../components/RealtyReviews.vue'),
     props: true

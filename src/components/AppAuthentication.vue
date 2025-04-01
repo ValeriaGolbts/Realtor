@@ -89,17 +89,21 @@ const signIn = async () => {
       password: password.value,
     });
     const newToken = response.data.access_token;
+    const userId = response.data.user_id;
     token.value = newToken;
     Cookies.set('authToken', newToken, {
       expires: rememberPassword.value ? 1 : 1,
       secure: true,
       sameSite: 'strict',
     });
+    Cookies.set('userId', userId, {
+      expires: rememberPassword.value ? 1 : 1,
+      secure: true,
+      sameSite: 'strict',
+    });
     emit('auth-success', email.value);
     closeModal(response.data.access_token);
-    console.log(token);
   } catch (error) {
-    console.error('Ошибка при авторизации:', error);
     if (error.response && error.response.status === 401) {
       emailError.value = true;
       passwordError.value = true;

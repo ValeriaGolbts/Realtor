@@ -25,8 +25,8 @@
             <div v-if="isMenuOpen" class="dropdown-menu" ref="dropdownMenu">
               <div class="menu-items">
                 <router-link class="menu-item" to="/profile">Мои объявления</router-link>
-                <a href="#" class="menu-item">Избранное</a>
-                <a href="#" class="menu-item">Редактировать профиль</a>
+                <a href="#" class="menu-item" @click.prevent="goToFavorites">Избранное</a>
+                <a href="#" class="menu-item" @click.prevent="goToEditProfile">Редактировать профиль</a>
                 <a href="#" class="menu-item" @click.prevent="openReviewModal">Оставить отзыв</a>
               </div>
               <button class="logout-button" @click="logout">Выйти</button>
@@ -63,7 +63,7 @@ import ReviewModal from './AppReviews.vue';
 import { useRouter } from 'vue-router';
 import { thisUrl } from '../url.js';
 
-const currentRealtyId = ref(7);
+const currentRealtyId = ref(15);
 const isModalOpenReg = ref(false);
 const isModalOpenAuth = ref(false);
 const isAuthenticated = ref(false);
@@ -117,6 +117,16 @@ const toggleMenu = async () => {
     await nextTick();
   }
 };
+
+const goToEditProfile = () => {
+  isMenuOpen.value = false
+  router.push({ path: '/profile', query: { tab: 'edit-profile' } })
+}
+
+const goToFavorites = () => {
+  isMenuOpen.value = false
+  router.push({ path: '/profile', query: { tab: 'favorites' } })
+}
 
 const handleClickOutside = (event) => {
   if (isMenuOpen.value && dropdownMenu.value && !dropdownMenu.value.contains(event.target)) {

@@ -9,25 +9,26 @@
 
     <div v-else class="realties-list">
       <div v-for="realty in realties" :key="realty.id" class="realty-card">
-        <img
-            v-if="getImageUrl(realty.images)"
-            :src="getImageUrl(realty.images)"
-            alt="Фото недвижимости"
-            class="realty-image"
-        />
-        <div v-else class="no-image-placeholder">
-          Нет изображения
+        <div class="listing-image-container">
+          <img
+              v-if="getImageUrl(realty.images)"
+              :src="getImageUrl(realty.images)"
+              alt="Фото недвижимости"
+              class="realty-image"
+          />
+          <div v-else class="no-image-placeholder">
+            Нет изображения
+          </div>
         </div>
 
         <div class="realty-info">
-          <h3 class="price">{{ formatPrice(realty.price) }} ₽ / МЕС</h3>
+          <h3 class="price">{{ formatPrice(realty.price) }} ₽ / мес</h3>
           <p class="details" v-if="realty.count_rooms && realty.total_square && realty.floor">
             {{ getRoomCountText(realty.count_rooms) }} · {{ realty.total_square }} м² · {{ realty.floor }} этаж
           </p>
           <p class="address">{{ realty.address }}</p>
           <div class="actions">
             <button class="view-reviews">СМОТРЕТЬ ОТЗЫВЫ</button>
-            <button class="edit-btn" @click="editRealty(realty.id)">Редактировать</button>
             <button class="delete-btn" @click="showDeleteModal(realty.id)">Удалить</button>
           </div>
         </div>
@@ -98,27 +99,27 @@ const deleteRealty = async (realtyId) => {
     if (!token) return;
 
     await axios.delete(`${thisUrl()}/realty/delete/${realtyId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     realties.value = realties.value.filter(item => item.id !== realtyId);
   } catch (err) {
     error.value = 'Не удалось удалить объявление';
   }
-
-};
-
-const editRealty = (realtyId) => {
-  console.log('Редактирование объявления:', realtyId);
 };
 
 const getImageUrl = (images) => {
   if (!images) return '';
   try {
-    const parsedImages = typeof images === 'string' ? JSON.parse(images) : images;
-    return parsedImages[0] || '';
+    let imagePath = '';
+    if (typeof images === 'string') {
+      const parsedImages = JSON.parse(images);
+      imagePath = parsedImages[0] || '';
+    } else if (Array.isArray(images)) {
+      imagePath = images[0] || '';
+    }
+    const baseUrl = thisUrl().replace('/api', '');
+    return `${baseUrl}/${imagePath}`.replace(/([^:]\/)\/+/g, "$1");
   } catch {
     return '';
   }
@@ -134,7 +135,7 @@ const getRoomCountText = (count) => {
   if (count === 'свободная планировка') return 'СВОБ. ПЛАНИРОВКА';
   return `${count} КОМН`;
 };
-console.log(realties)
+
 onMounted(fetchRealties);
 </script>
 
@@ -173,10 +174,27 @@ onMounted(fetchRealties);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.realty-image {
+.listing-image-container {
+  position: relative;
   width: 320px;
   height: 200px;
+}
+
+.realty-image {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+}
+
+.no-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  color: #666;
+  border: 1px dashed #ccc;
 }
 
 .realty-info {
@@ -211,7 +229,6 @@ onMounted(fetchRealties);
 }
 
 .view-reviews,
-.edit-btn,
 .delete-btn {
   padding: 6px 12px;
   border-radius: 4px;
@@ -225,27 +242,10 @@ onMounted(fetchRealties);
   color: #FF784F;
 }
 
-.edit-btn {
-  background: #FF784F;
-  border: 1px solid #FF784F;
-  color: white;
-}
-
 .delete-btn {
   background: none;
   border: 1px solid #ff4a2b;
   color: #ff4a2b;
-}
-
-.no-image-placeholder {
-  width: 320px;
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f0f0;
-  color: #666;
-  border: 1px dashed #ccc;
 }
 
 .modal-overlay {

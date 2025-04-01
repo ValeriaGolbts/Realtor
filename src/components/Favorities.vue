@@ -9,7 +9,7 @@
 
     <div v-else class="realties-list">
       <div v-for="realty in favorites" :key="realty.id" class="realty-card">
-        <div class="image-wrapper">
+        <div class="listing-image-container">
           <img
               v-if="getImageUrl(realty.images)"
               :src="getImageUrl(realty.images)"
@@ -40,7 +40,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно подтверждения удаления -->
     <div v-if="showModal" class="modal-overlay">
       <div class="modal">
         <h3>Подтверждение удаления</h3>
@@ -124,8 +123,15 @@ const removeFavorite = async (realtyId) => {
 const getImageUrl = (images) => {
   if (!images) return '';
   try {
-    const parsedImages = typeof images === 'string' ? JSON.parse(images) : images;
-    return parsedImages[0] || '';
+    let imagePath = '';
+    if (typeof images === 'string') {
+      const parsedImages = JSON.parse(images);
+      imagePath = parsedImages[0] || '';
+    } else if (Array.isArray(images)) {
+      imagePath = images[0] || '';
+    }
+    const baseUrl = thisUrl().replace('/api', '');
+    return `${baseUrl}/${imagePath}`.replace(/([^:]\/)\/+/g, "$1");
   } catch {
     return '';
   }
@@ -180,13 +186,15 @@ onMounted(fetchFavorites);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.image-wrapper {
+.listing-image-container {
   position: relative;
+  width: 320px;
+  height: 200px;
 }
 
 .realty-image {
-  width: 320px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -206,8 +214,8 @@ onMounted(fetchFavorites);
 }
 
 .no-image-placeholder {
-  width: 320px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,7 +271,6 @@ onMounted(fetchFavorites);
   font-size: 14px;
 }
 
-/* Стили для модального окна */
 .modal-overlay {
   position: fixed;
   top: 0;

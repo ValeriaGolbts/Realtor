@@ -224,7 +224,7 @@
                 <img
                     class="heart-on-image"
                     @click.stop="toggleFavorite(listing.id, index)"
-                    :src="listing.is_favorite"
+                    :src="listing.is_favorite ? fullShape : shape"
                     alt="Добавить в избранное"
                 />
               </div>
@@ -320,10 +320,21 @@ import { ref, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { thisUrl } from "../url.js";
 import { useRouter } from 'vue-router';
+import Cookies from 'js-cookie';
+import shape from "@/assets/shape.png";
+import fullShape from "@/assets/full_shape.png";
 
 const router = useRouter();
+const getToken = () => Cookies.get('authToken') || '';
 
-// Reactive state
+axios.interceptors.request.use(config => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, error => Promise.reject(error));
+
 const listings = ref([]);
 const searchQuery = ref('');
 const sortOrder = ref('asc');
@@ -376,7 +387,6 @@ const filters = ref({
   repair_id: null,
 });
 
-// Computed properties
 const totalPages = computed(() => {
   return Math.ceil(totalItems.value / itemsPerPage.value);
 });
@@ -420,7 +430,6 @@ const showLastPage = computed(() => {
   return visiblePages.value[visiblePages.value.length - 1] < totalPages.value;
 });
 
-// Methods
 const fetchData = async () => {
   loading.value = true;
   error.value = null;
@@ -433,26 +442,22 @@ const fetchData = async () => {
       sort: sortOrder.value,
     };
 
-    // Удаляем null/undefined параметры
     Object.keys(params).forEach(key => {
       if (params[key] === null || params[key] === undefined || params[key] === '') {
         delete params[key];
       }
     });
 
-    // Если массив count_rooms пуст, удаляем его из параметров
     if (params.count_rooms && params.count_rooms.length === 0) {
       delete params.count_rooms;
     }
 
     const response = await axios.get(`${thisUrl()}/realty/filter`, { params });
-
     listings.value = response.data.listings || [];
     propertyTypes.value = response.data.propertyTypes || [];
     renovationTypes.value = response.data.renovationTypes || [];
     totalItems.value = response.data.total || 0;
 
-    // Обновляем диапазон цен на основе ответа сервера
     if (response.data.priceRange) {
       priceRange.value = {
         min: Math.floor(response.data.priceRange.min),
@@ -461,9 +466,7 @@ const fetchData = async () => {
       filters.value.price_min = priceRange.value.min;
       filters.value.price_max = priceRange.value.max;
     }
-
   } catch (err) {
-    console.error('Ошибка при загрузке данных:', err);
     error.value = 'Не удалось загрузить данные.';
   } finally {
     loading.value = false;
@@ -476,7 +479,6 @@ const applyFilters = () => {
 };
 
 const handleSearch = () => {
-  // Добавляем задержку для поиска, чтобы не делать запрос на каждый ввод
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
     currentPage.value = 1;
@@ -530,11 +532,9 @@ const selectRenovationType = (typeId) => {
 };
 
 const updateRange = () => {
-  // Убедимся, что min не больше max
   if (filters.value.price_min > filters.value.price_max) {
     filters.value.price_min = filters.value.price_max;
   }
-  // И наоборот
   if (filters.value.price_max < filters.value.price_min) {
     filters.value.price_max = filters.value.price_min;
   }
@@ -564,20 +564,43 @@ const formatRooms = (count) => {
   return `${count} комн.`;
 };
 
-
 const toggleFavorite = async (listingId, index) => {
+  const token = getToken();
+  if (!token) {
+    alert('Пожалуйста, войдите в систему, чтобы добавить в избранное');
+    router.push('/login');
+    return;
+  }
+
   try {
-    const response = await axios.post(`${thisUrl()}/favorites/toggle`, { realty_id: listingId });
-    listings.value[index].is_favorite = response.data.is_favorite;
+    const listing = listings.value[index];
+    let response;
+
+    if (listing.is_favorite) {
+      response = await axios.delete(`${thisUrl()}/favorite/destroy/${listingId}`);
+      if (response.status === 200) {
+        listings.value[index].is_favorite = false;
+      }
+    } else {
+      response = await axios.post(`${thisUrl()}/favorite/addToFavorite/${listingId}`);
+      if (response.status === 200) {
+        listings.value[index].is_favorite = true;
+      }
+    }
   } catch (err) {
-    console.error('Ошибка при изменении избранного:', err);
+    if (err.response) {
+      if (err.response.status === 400) {
+        alert(err.response.data.error);
+      } else if (err.response.status === 401) {
+        alert('Сессия истекла. Пожалуйста, войдите снова.');
+        router.push('/login');
+      }
+    }
   }
 };
 
-// Watchers
 watch(currentPage, fetchData);
 
-// Lifecycle hooks
 onMounted(() => {
   fetchData();
 });
@@ -606,6 +629,24 @@ onMounted(() => {
   color: #fff;
   font-size: 16px;
   font-weight: bold;
+}
+
+.heart-on-image {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: auto;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.heart-on-image:hover {
+  opacity: 0.8;
+}
+
+.heart-on-image:active {
+  opacity: 0.2;
 }
 
 .container {
