@@ -164,8 +164,6 @@
         <div class="actions">
           <!-- Кнопка "Продолжить", переход на следующий шаг -->
           <button @click.prevent="validateStep1" class="button primary">Продолжить</button>
-          <!-- Кнопка "Сохранить и выйти" -->
-          <button @click.prevent="saveAndExit" class="button secondary">Сохранить и выйти</button>
         </div>
       </div>
 
@@ -477,8 +475,8 @@ onMounted(fetchData);
 
 .content-container {
   margin-top: 10%;
-  margin-right: 23px;
-  margin-left: 23px;
+  margin-right: 160px;
+  margin-left: 160px;
   margin-bottom: 17%;
   font-family: Arial, sans-serif;
   background-color: rgba(242, 240, 238, 1);
