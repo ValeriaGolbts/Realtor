@@ -656,8 +656,8 @@ onMounted(() => {
 
 .content-container {
   margin-top: 6%;
-  margin-right: 23px;
-  margin-left: 23px;
+  margin-right: 160px;
+  margin-left: 160px;
 }
 
 .search-and-sort {

@@ -498,7 +498,7 @@ const changePassword = async () => {
 .error-message {
   color: #ff4444;
   font-size: 12px;
-  margin-top: - 20px;
+  margin-top: -20px;
   margin-bottom: 15px;
   display: block;
   font-family: 'Noto Sans', sans-serif;

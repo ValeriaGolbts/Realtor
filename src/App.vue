@@ -42,7 +42,6 @@ watch(route, (newRoute) => {
 <style scoped>
 .custom-header {
   position: absolute;
-  left: -2%;
 }
 
 body{

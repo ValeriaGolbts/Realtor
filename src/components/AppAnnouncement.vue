@@ -38,6 +38,7 @@
             <div class="rating">
               <span>{{ apartment.rating || 'Нет оценок' }}</span>
               <span v-for="i in 5" :key="i">⭐</span>
+              <a href="#" class="leave-review-link" @click.prevent="openReviewModal">Оставить отзыв</a>
             </div>
             <div class="price">
               {{ formattedPrice }} ₽ / мес
@@ -46,22 +47,22 @@
 
             <div class="details-grid">
               <div class="detail-item">
-                <div>{{ apartment.count_rooms }} комн.</div>
+                <div class="data">{{ apartment.count_rooms }} комн.</div>
                 <div class="detail-label">{{ apartment.type_realty?.title || 'Тип не указан' }}</div>
               </div>
               <div class="detail-item">
-                <div>{{ apartment.total_square }}</div>
+                <div class="data">{{ apartment.total_square }}</div>
                 <div class="detail-label">общая пл</div>
               </div>
               <div class="detail-item">
-                <div>{{ apartment.floor }}/{{ apartment.max_floor }}</div>
+                <div class="data">{{ apartment.floor }}{{ apartment.max_floor }}</div>
                 <div class="detail-label">этаж</div>
               </div>
             </div>
 
             <div class="address-text">{{ apartment.address || 'Адрес не указан' }}</div>
             <button class="show-phone-button" @click="togglePhone">
-              {{ showPhone ? apartment.contact_phone : 'Показать номер телефона' }}
+              {{ showPhone ? apartment.owner.phone : 'ПОКАЗАТЬ НОМЕР ТЕЛЕФОНА' }}
             </button>
           </div>
 
@@ -90,13 +91,19 @@
           <li>Общая площадь: {{ apartment.total_square || 'Не указано' }} м²</li>
           <li>Жилая площадь: {{ apartment.living_square || 'Не указано' }} м²</li>
           <li>Площадь кухни: {{ apartment.kitchen_square || 'Не указано' }} м²</li>
-          <li>Балкон/лоджия: {{ apartment.balcony ? 'Есть' : 'Нет' }}</li>
           <li>Ремонт: {{ apartment.type_repair?.title || 'Не указано' }}</li>
           <li>Этаж: {{ apartment.floor || 'Не указано' }}</li>
           <li>Год постройки дома: {{ apartment.year_construction || 'Не указано' }}</li>
         </ul>
       </section>
     </div>
+    <ReviewModal
+        v-if="apartment.id"
+        :isOpen="reviewModalOpen"
+        :realtyId="apartment.id"
+        @update:isOpen="reviewModalOpen = $event"
+        @review-submitted="handleReviewSubmitted"
+    />
   </div>
 </template>
 
@@ -105,21 +112,20 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { thisUrl } from '../url.js';
+import ReviewModal from '/src/components/AppReviews.vue'
 
 const route = useRoute();
 const router = useRouter();
 const apartmentId = route.params.id;
-
+const reviewModalOpen = ref(false);
 // Дефолтные изображения
 const defaultImage = ref('/images/default-apartment.jpg');
-const defaultAvatar = ref('/images/default-avatar.jpg');
 
 // Состояние компонента
 const apartment = ref({
   id: null,
   images: [],
   price: 0,
-  old_price: null,
   count_rooms: '',
   total_square: 0,
   living_square: 0,
@@ -129,16 +135,11 @@ const apartment = ref({
   address: '',
   rating: null,
   contact_phone: '',
-  payment: '',
-  deposit: '',
-  rental_period: '',
   description: '',
-  balcony: false,
   year_construction: 0,
   type_rent: null,
   type_realty: null,
   type_repair: null,
-  user: null
 });
 
 const currentImage = ref('');
@@ -150,36 +151,34 @@ const formattedPrice = computed(() => {
   return new Intl.NumberFormat('ru-RU').format(apartment.value.price);
 });
 
-const formattedOldPrice = computed(() => {
-  return apartment.value.old_price ? new Intl.NumberFormat('ru-RU').format(apartment.value.old_price) : '';
-});
+
+
+const openReviewModal = () => {
+  reviewModalOpen.value = true;
+};
+
+const handleReviewSubmitted = () => {
+  fetchApartmentData();
+};
 
 // Методы
 const fetchApartmentData = async () => {
   try {
-    const response = await axios.get(`${thisUrl()}/realty/filter`, {
-      params: {
-        id: apartmentId
-      }
-    });
+    // Используем endpoint для получения конкретной квартиры
+    const response = await axios.get(`${thisUrl()}/realty/show/${apartmentId}`);
 
-    // Находим нужное объявление (так как /filter возвращает массив)
-    const listing = response.data.listings.find(item => item.id == apartmentId);
+    if (response.data) {
+      apartment.value = response.data;
 
-    if (listing) {
-      apartment.value = listing;
-
-      // Обрабатываем изображения
-      if (Array.isArray(apartment.value.images)) {
-        currentImage.value = apartment.value.images[0] || defaultImage.value;
+      // Проверяем наличие изображений
+      if (Array.isArray(apartment.value.images) && apartment.value.images.length > 0) {
+        currentImage.value = apartment.value.images[0];
       } else {
-        apartment.value.images = [];
         currentImage.value = defaultImage.value;
       }
 
-      // Проверяем владельца
-      const userId = localStorage.getItem('userId');
-      isOwner.value = userId && apartment.value.user_id === parseInt(userId);
+      // Логируем полученные данные для отладки
+      console.log('Данные квартиры:', response.data);
     } else {
       router.push('/not-found');
     }
@@ -189,22 +188,16 @@ const fetchApartmentData = async () => {
   }
 };
 
-const selectImage = (image) => {
-  currentImage.value = image || defaultImage.value;
-};
-
+// Переключение видимости телефона
 const togglePhone = () => {
   showPhone.value = !showPhone.value;
+
+  // Можно добавить логирование для отладки
+  if (showPhone.value) {
+    console.log('Показан телефон:', apartment.value.user?.phone);
+  }
 };
 
-// Обработчики ошибок изображений
-const handleImageError = () => {
-  currentImage.value = defaultImage.value;
-};
-
-const handleThumbnailError = (index) => {
-  apartment.value.images[index] = defaultImage.value;
-};
 
 
 onMounted(() => {
@@ -277,7 +270,9 @@ main{
 .active-thumbnail {
   border-color: #ff6600;
 }
-
+.data{
+  font-size: 21px;
+}
 .details {
   flex: 1;
   width: 790px;
@@ -289,11 +284,9 @@ main{
   padding: 20px;
   margin-bottom: 20px;
   color: white;
+  height: 449px;
 }
 
-.rating {
-  margin-bottom: 10px;
-}
 
 .price {
   font-size: 24px;
@@ -309,18 +302,21 @@ main{
 }
 
 .details-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 15px;
   margin: 20px 0;
 }
 
 .detail-item {
+  width: 120px;
+  height: 62px;
   text-align: center;
+  border: 1px solid rgba(67, 67, 67, 1);
+  border-radius: 5px;
 }
 
 .detail-label {
-  font-size: 14px;
+  font-size: 17px;
   color: #6c757d;
   margin-top: 5px;
 }
@@ -328,18 +324,22 @@ main{
 .address-text {
   margin: 15px 0;
   font-size: 16px;
+  margin-bottom: 17%;
 }
 
 .show-phone-button {
   width: 100%;
+  max-width: 750px;
+  height: 56px;
   padding: 10px;
-  background-color: #ff6600;
-  color: white;
+  background-color: rgba(255, 120, 79, 1);
+  color: black;
   border: none;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
   margin-bottom: 15px;
+  font-size: 13px;
 }
 
 .owner-buttons {
@@ -401,6 +401,22 @@ li {
   position: relative;
 }
 
+.rating {
+  margin-bottom: 7%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.leave-review-link {
+  color: #ff6600;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.leave-review-link:hover {
+  text-decoration: underline;
+}
 
 @media (max-width: 768px) {
   .apartment-details {
