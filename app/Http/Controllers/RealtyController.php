@@ -138,17 +138,16 @@ class RealtyController extends Controller
 
         $query = Realty::with(['typeRent', 'typeRealty', 'typeRepair']);
 
-        // Тип аренды
+        $query->latest('created_at');
+
         if ($request->has('type_rent_id')) {
             $query->where('type_rent_id', $request->input('type_rent_id'));
         }
 
-        // Тип недвижимости
         if ($request->has('type_realty_id')) {
             $query->where('type_realty_id', $request->input('type_realty_id'));
         }
 
-        // Цена
         if ($request->has('price_min')) {
             $query->where('price', '>=', $request->input('price_min'));
         }
@@ -156,12 +155,10 @@ class RealtyController extends Controller
             $query->where('price', '<=', $request->input('price_max'));
         }
 
-        // Количество комнат
         if ($request->has('count_rooms')) {
             $query->whereIn('count_rooms', $request->input('count_rooms'));
         }
 
-        // Общая площадь
         if ($request->has('total_square_min')) {
             $query->where('total_square', '>=', $request->input('total_square_min'));
         }
@@ -169,7 +166,6 @@ class RealtyController extends Controller
             $query->where('total_square', '<=', $request->input('total_square_max'));
         }
 
-        // Жилая площадь
         if ($request->has('living_square_min')) {
             $query->where('living_square', '>=', $request->input('living_square_min'));
         }
@@ -177,7 +173,6 @@ class RealtyController extends Controller
             $query->where('living_square', '<=', $request->input('living_square_max'));
         }
 
-        // Этаж
         if ($request->has('floor_min')) {
             $query->where('floor', '>=', $request->input('floor_min'));
         }
@@ -185,7 +180,6 @@ class RealtyController extends Controller
             $query->where('floor', '<=', $request->input('floor_max'));
         }
 
-        // Ремонт
         if ($request->has('repair_id')) {
             $query->where('repair_id', $request->input('repair_id'));
         }

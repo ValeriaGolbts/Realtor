@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('realty/filter', 'App\Http\Controllers\RealtyController@filter');
+Route::get('show/{realty}', 'App\Http\Controllers\MainController@show');
+Route::get('feedback/outputFeedback/{realty}', 'App\Http\Controllers\FeedbackController@outputFeedback');
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -24,9 +28,6 @@ Route::group(['middleware' => 'check.guest'], function () {
     Route::post('reg', 'App\Http\Controllers\RegistrationController@reg');
     Route::get('index', 'App\Http\Controllers\MainController@index');
     Route::get('preview', 'App\Http\Controllers\RealtyController@preview');
-    Route::get('realty/filter', 'App\Http\Controllers\RealtyController@filter');
-    Route::get('show/{realty}', 'App\Http\Controllers\MainController@show');
-    Route::get('feedback/outputFeedback/{realty}', 'App\Http\Controllers\FeedbackController@outputFeedback');
 });
 
 Route::group(['middleware' => 'jwt.auth'], function () {
