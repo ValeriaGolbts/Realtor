@@ -9,8 +9,7 @@
       </div>
     </div>
     <div class="links">
-      <router-link class="router-link" to="/filters-search">Длительная аренда</router-link>
-      <router-link class="router-link" to="/filters-search">Недвижимость посуточно</router-link>
+      <router-link class="router-link" to="/filters-search">Найти квартиру</router-link>
     </div>
     <div class="authreg">
       <div v-if="!isAuthenticated" class="auth-buttons">
@@ -18,7 +17,7 @@
         <button @click="openModalRegistration">ЗАРЕГИСТРИРОВАТЬСЯ</button>
       </div>
       <div v-else class="user-menu">
-        <button class="create-ad">Создать объявление</button>
+        <router-link class="create-ad" to="/create_announ">Создать объявление</router-link>
         <div class="avatar-container">
           <img src="@/assets/avatar.png" alt="Аватар" class="avatar" :style="{ border: isMenuOpen ? '2px solid #FF4A2B' : 'none' }" @click.stop="toggleMenu">
           <Transition name="dropdown">
@@ -192,7 +191,7 @@ header {
   justify-content: space-between;
   color: black;
   font-size: 16px;
-  width: 21%;
+  gap: 22px;
 }
 .router-link{
   text-decoration: none;
@@ -232,6 +231,8 @@ header {
 }
 
 .create-ad {
+  display: flex;
+  justify-content: center;
   border: 1px solid #FF4A2B;
   background: none;
   color: #000;
@@ -242,7 +243,7 @@ header {
   font-size: 16px;
   margin-right: 10px;
   transition: all 500ms ease;
-  font-family: Noto Sans;
+  text-decoration: none;
 }
 
 .create-ad:hover {

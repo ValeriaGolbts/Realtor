@@ -1,6 +1,6 @@
 <template>
-  <div class="app">
-    <main class="main-content">
+  <div class="container">
+    <div class="content-container">
       <section class="apartment-details">
         <!-- Галерея изображений -->
         <div class="image-gallery-container">
@@ -96,7 +96,7 @@
           <li>Год постройки дома: {{ apartment.year_construction || 'Не указано' }}</li>
         </ul>
       </section>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -213,19 +213,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
+main{
+  background-color: rgba(242, 240, 238, 1);
+}
 /* Стили остаются без изменений */
-.app {
-  margin: 0 auto;
-  max-width: 1200px;
-  padding: 20px;
+.container {
+  display: flex;
+  background-color: rgba(242, 240, 238, 1);
 }
 
-.main-content {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-top: 10%;
+.content-container {
+  margin-top: 6%;
+  margin-right: 23px;
+  margin-left: 160px;
 }
 
 .apartment-details {
@@ -237,6 +237,7 @@ onMounted(() => {
 .image-gallery-container {
   flex: 1;
   min-width: 0;
+  width: 790px;
 }
 
 .main-image-wrapper {
@@ -246,7 +247,6 @@ onMounted(() => {
 
 .main-image {
   width: 100%;
-  height: 400px;
   object-fit: cover;
   border-radius: 8px;
 }
@@ -266,8 +266,8 @@ onMounted(() => {
 }
 
 .thumbnail {
-  width: 80px;
-  height: 60px;
+  width: 150px;
+  height: 90px;
   object-fit: cover;
   border-radius: 4px;
   border: 2px solid transparent;
@@ -280,7 +280,7 @@ onMounted(() => {
 
 .details {
   flex: 1;
-  min-width: 300px;
+  width: 790px;
 }
 
 .detail {
@@ -398,16 +398,9 @@ ul {
 
 li {
   margin-bottom: 8px;
-  padding-left: 20px;
   position: relative;
 }
 
-li:before {
-  content: "•";
-  color: #ff6600;
-  position: absolute;
-  left: 0;
-}
 
 @media (max-width: 768px) {
   .apartment-details {
