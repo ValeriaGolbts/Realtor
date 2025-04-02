@@ -1,7 +1,6 @@
 <template>
   <div class="container">
     <div class="content-container">
-      <!-- Заголовок -->
       <h1 class="title">Разместить объявление</h1>
 
       <!-- Кнопка "Назад", отображается только на втором шаге -->
@@ -173,7 +172,6 @@
           <h3 class="subtitle">Как выглядит недвижимость</h3>
           <div class="photo-upload">
             <div class="photo-previews">
-              <!-- Пример превью фотографий -->
               <div class="photo-preview" v-for="(photo, index) in form.photos" :key="index">
                 <img :src="photo" alt="Фото квартиры" />
                 <div class="photo-actions">
@@ -203,7 +201,6 @@
           <div class="error-message" v-if="errors.description">{{ errors.description }}</div>
         </div>
         <div class="actions">
-          <!-- Кнопка "Опубликовать", отправка данных на сервер -->
           <button @click.prevent="validateAndPublish" class="button primary">Опубликовать</button>
         </div>
       </div>
@@ -216,11 +213,11 @@ import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
 import { thisUrl } from '../url.js';
 import Cookies from 'js-cookie';
+import router from "@/router/index.js";
 
 const step = ref(1);
 const photoInput = ref(null);
 
-// Основная форма
 const form = reactive({
   type_rent_id: '',
   type_realty_id: '',
@@ -237,7 +234,6 @@ const form = reactive({
   photos: [],
 });
 
-// Ошибки валидации
 const errors = reactive({
   type_rent_id: '',
   type_realty_id: '',
@@ -254,13 +250,11 @@ const errors = reactive({
   photos: '',
 });
 
-// Опции для селектов
 const rentTypeOptions = ref([]);
 const propertyTypeOptions = ref([]);
 const repairTypeOptions = ref([]);
 const roomOptions = ref(['студия', '1', '2', '3', '4', '5', '6+', 'свободная планировка']);
 
-// Правила валидации для каждого поля
 const validationRules = {
   type_rent_id: (value) => !value ? 'Выберите тип аренды' : '',
   type_realty_id: (value) => !value ? 'Выберите тип недвижимости' : '',
@@ -308,13 +302,11 @@ const validationRules = {
   photos: (value) => value.length === 0 ? 'Добавьте хотя бы одно фото' : '',
 };
 
-// Валидация конкретного поля
 const validateField = (fieldName) => {
   const value = form[fieldName];
   errors[fieldName] = validationRules[fieldName](value);
 };
 
-// Валидация всех полей шага 1
 const validateStep1 = () => {
   const step1Fields = [
     'type_rent_id', 'type_realty_id', 'count_rooms', 'repair_id',
@@ -334,17 +326,16 @@ const validateStep1 = () => {
   }
 };
 
-// Валидация всех полей перед публикацией
 const validateAndPublish = () => {
   validateField('description');
   validateField('photos');
 
   if (!errors.description && !errors.photos) {
     publishAd();
+    router.push('/profile')
   }
 };
 
-// Получение данных с сервера
 const fetchData = async () => {
   try {
     const response = await axios.get(`${thisUrl()}/realty/filter`);
@@ -354,14 +345,12 @@ const fetchData = async () => {
   }
 };
 
-// Установка опций для селектов
 const setSelectOptions = (data) => {
   propertyTypeOptions.value = data.propertyTypes;
   rentTypeOptions.value = data.rentTypes;
   repairTypeOptions.value = data.renovationTypes;
 };
 
-// Открытие файлового менеджера
 const openFileSelector = () => {
   photoInput.value.click();
 };
@@ -375,7 +364,6 @@ const prevStep = () => {
   step.value = 1;
 };
 
-// Работа с фотографиями
 const addPhoto = (event) => {
   const files = event.target.files;
   if (files && files.length > 0) {
@@ -410,7 +398,7 @@ const removePhoto = (index) => {
   validateField('photos');
 };
 
-// Публикация объявления
+
 const publishAd = async () => {
   try {
     const formData = new FormData();
@@ -422,7 +410,6 @@ const publishAd = async () => {
       }
     });
 
-    // Обрабатываем фотографии
     if (form.photos && form.photos.length > 0) {
       form.photos.forEach((photo, index) => {
         if (photo instanceof File) {
@@ -451,7 +438,6 @@ const publishAd = async () => {
     });
 
     console.log('Success:', response.data);
-    // Здесь можно добавить редирект или сообщение об успехе
 
   } catch (error) {
     console.error('Error:', error);
@@ -467,7 +453,6 @@ onMounted(fetchData);
 </script>
 
 <style scoped>
-/* Основные стили остаются без изменений */
 .container {
   display: flex;
   background-color: rgba(242, 240, 238, 1);
@@ -655,7 +640,6 @@ onMounted(fetchData);
   text-decoration: none;
 }
 
-/* Стили для сообщений об ошибках */
 .error-message {
   color: #ff0000;
   font-size: 14px;

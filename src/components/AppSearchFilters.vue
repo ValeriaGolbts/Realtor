@@ -607,7 +607,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Your existing styles remain unchanged */
 .dots {
   color: white;
   font-size: 18px;
@@ -903,7 +902,6 @@ button.active {
 }
 
 .listings-container {
-  background: rgba(17, 17, 17, 1);
   border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
@@ -919,12 +917,15 @@ button.active {
   border-radius: 5px;
   overflow: hidden;
   height: 540px;
-  width: 427px; /* Фиксированная ширина вместо calc(33.33% - 20px) */
+  width: 360px;
   box-sizing: border-box;
   flex-grow: 0;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
 }
-
+.listing:hover {
+  transform: translateY(-5px);
+}
 .listing-image-container {
   position: relative;
   width: 100%;
@@ -989,11 +990,6 @@ button.active {
   text-decoration: line-through;
 }
 
-.details {
-  font-family: Noto Sans, sans-serif;
-  font-weight: 400;
-  font-size: 24px;
-}
 
 .address {
   font-family: Noto Sans, sans-serif;
@@ -1005,28 +1001,6 @@ button.active {
   font-family: Noto Sans, sans-serif;
   font-weight: 600;
   font-size: 19px;
-}
-
-.view-all {
-  width: 220px;
-  height: 40px;
-  border-radius: 5px;
-  padding: 10px 16px;
-  border: 1px solid rgb(255, 110, 66);
-  font-family: Noto Sans, sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  color: rgb(253, 253, 253);
-  cursor: pointer;
-  transition: all 700ms ease;
-  background-color: rgb(17, 17, 17);
-  margin-left: 690px;
-  margin-top: 25px;
-  margin-bottom: 132px;
-}
-
-.view-all:hover {
-  background-color: rgb(255, 110, 66);
 }
 
 .no-listings {
@@ -1085,6 +1059,5 @@ button.active {
 }
 .listing {
   cursor: pointer;
-  /* остальные стили */
 }
 </style>

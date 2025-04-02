@@ -8,7 +8,6 @@
                 :src="currentImage || defaultImage"
                 alt="Apartment photo"
                 class="main-image"
-                @error="handleImageError"
             />
           </div>
 
@@ -25,7 +24,6 @@
                     alt="Thumbnail"
                     class="thumbnail"
                     :class="{ 'active-thumbnail': currentImage === image }"
-                    @error="handleThumbnailError(index)"
                 />
               </div>
             </div>
@@ -43,7 +41,6 @@
             </div>
             <div class="price">
               {{ formattedPrice }} ₽ / мес
-              <span class="old-price" v-if="apartment.old_price">{{ formattedOldPrice }} ₽</span>
             </div>
 
             <div class="details-grid">
@@ -68,12 +65,7 @@
           </div>
 
           <div class="author">
-            <img
-                :src="apartment.user?.avatar"
-                alt="Author"
-                class="author-avatar"
-            />
-            <span>{{ apartment.user?.name || 'Автор не указан' }}</span>
+            <span> {{ apartment.user || 'Автор не указан' }}</span>
           </div>
         </div>
       </section>
@@ -244,6 +236,10 @@ const fetchApartmentData = async () => {
   }
 };
 
+const selectImage = (image) => {
+  currentImage.value = image || defaultImage.value;
+};
+
 const isReviewAuthor = (reviewUserId) => {
   return currentUserId.value && parseInt(currentUserId.value) === reviewUserId;
 };
@@ -313,8 +309,8 @@ main {
 
 .main-image {
   width: 100%;
-  object-fit: cover;
   border-radius: 8px;
+  max-height: 450px;
 }
 
 .thumbnails-scroll-container {
@@ -357,7 +353,7 @@ main {
   background-color: black;
   border-radius: 8px;
   padding: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 1%;
   color: white;
   height: 449px;
 }
@@ -418,10 +414,11 @@ main {
 
 .author {
   display: flex;
-  align-items: center;
   gap: 10px;
-  padding-top: 15px;
-  border-top: 1px solid #dee2e6;
+  padding: 2%;
+  background-color: black;
+  color: white;
+  border-radius: 5px;
 }
 
 .author-avatar {
