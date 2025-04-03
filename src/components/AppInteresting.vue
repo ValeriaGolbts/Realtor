@@ -4,58 +4,143 @@
       <div class="title-name">
         <h2 class="name">ВАМ БУДЕТ ИНТЕРЕСНО</h2>
       </div>
-      <div class="listings-container">
-        <div v-for="(listing, index) in listings.slice(0, 3)" :key="index" class="listing">
+      <div v-if="loading" class="loading">Загрузка...</div>
+      <div v-if="error" class="error">{{ error }}</div>
+      <div v-if="!loading && !error" class="listings-container">
+        <div
+            v-for="(listing, index) in listings.slice(0, 3)"
+            :key="listing.id"
+            class="listing"
+            @click="goToAnnouncement(listing.id)"
+        >
           <div class="listing-image-container">
-            <img :src="imageUrl" alt="Квартира" class="listing-image"/>
-            <span v-if="listing.oldPrice && listing.oldPrice.trim() !== ''" class="good-price">Хорошая цена</span>
+            <img
+                :src="listing.images[0] || imageUrl"
+                alt="Квартира"
+                class="listing-image"
+                @error="handleImageError"
+            />
+            <span v-if="listing.old_price" class="good-price">Хорошая цена</span>
             <img
                 class="heart-on-image"
-                @click="$emit('toggle-favorite', index)"
-                :src="listing.isFavorited ? fullShape : shape"
+                @click.stop="toggleFavorite(listing.id, index)"
+                :src="listing.is_favorite ? fullShape : shape"
                 alt="Добавить в избранное"
             />
           </div>
           <div class="listing-info">
-            <span class="price">{{ listing.price }} ₽ / мес</span><br>
-            <span class="old-price" v-if="listing.oldPrice">{{ listing.oldPrice }} ₽</span>
-            <p class="details">{{ listing.details }}</p>
-            <p class="complex-name"><strong>{{ listing.complex }}</strong></p>
+            <span class="price">{{ formatPrice(listing.price) }} ₽ / мес</span><br>
+            <p class="details">{{ formatRooms(listing.count_rooms) }}, {{ listing.total_square }} м²</p>
+            <p class="complex-name"><strong>{{ listing.complex_name }}</strong></p>
             <p class="address">{{ listing.address }}</p>
           </div>
         </div>
       </div>
-      <button class="view-all">СМОТРЕТЬ ВСЕ</button>
+      <button class="view-all" @click="$router.push('/filters-search')">СМОТРЕТЬ ВСЕ</button>
     </div>
   </section>
 </template>
 
 <script setup>
-defineProps({
-  listings: {
-    type: Array,
-    required: true
-  },
-  imageUrl: {
-    type: String,
-    required: true
-  },
-  shape: {
-    type: String,
-    required: true
-  },
-  fullShape: {
-    type: String,
-    required: true
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { thisUrl } from "../url.js";
+import { useRouter } from 'vue-router';
+import Cookies from 'js-cookie';
+import imageUrl from "@/assets/appartment.png"
+import shape from "@/assets/shape.png"
+import fullShape from "@/assets/full_shape.png"
+
+const router = useRouter();
+const getToken = () => Cookies.get('authToken') || '';
+
+axios.interceptors.request.use(config => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-})
+  return config;
+}, error => Promise.reject(error));
 
-defineEmits(['toggleFavorite'])
+const listings = ref([]);
+const loading = ref(false);
+const error = ref(null);
 
+const fetchTopListings = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const response = await axios.get(`${thisUrl()}/realty/filter`);
+    listings.value = response.data.listings || [];
+  } catch (err) {
+    error.value = 'Не удалось загрузить топовые предложения';
+    console.error('Ошибка загрузки:', err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const formatPrice = (price) => {
+  if (!price) return '';
+  return new Intl.NumberFormat('ru-RU').format(price);
+};
+
+const formatRooms = (count) => {
+  if (count === 'студия') return 'Студия';
+  if (count === '6+') return '6+ комн.';
+  if (count === 'свободная планировка') return 'Своб. план.';
+  return `${count} комн.`;
+};
+
+const toggleFavorite = async (listingId, index) => {
+  const token = getToken();
+  if (!token) {
+    alert('Пожалуйста, войдите в систему, чтобы добавить в избранное');
+    router.push('/login');
+    return;
+  }
+
+  try {
+    const listing = listings.value[index];
+    let response;
+
+    if (listing.is_favorite) {
+      response = await axios.delete(`${thisUrl()}/favorite/destroy/${listingId}`);
+      if (response.status === 200) {
+        listings.value[index].is_favorite = false;
+      }
+    } else {
+      response = await axios.post(`${thisUrl()}/favorite/addToFavorite/${listingId}`);
+      if (response.status === 200) {
+        listings.value[index].is_favorite = true;
+      }
+    }
+  } catch (err) {
+    if (err.response) {
+      if (err.response.status === 400) {
+        alert(err.response.data.error);
+      } else if (err.response.status === 401) {
+        alert('Сессия истекла. Пожалуйста, войдите снова.');
+        router.push('/login');
+      }
+    }
+  }
+};
+
+const goToAnnouncement = (id) => {
+  router.push(`/announ/${id}`);
+};
+
+const handleImageError = (e) => {
+  e.target.src = imageUrl;
+};
+
+onMounted(() => {
+  fetchTopListings();
+});
 </script>
 
 <style scoped>
-
 body {
   margin: 0;
 }
@@ -78,7 +163,6 @@ body {
 
 .name {
   color: rgb(253, 253, 253);
-  font-family: Noto Sans;
   font-weight: 500;
   font-size: 21px;
   text-align: left;
@@ -90,7 +174,6 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-
 }
 
 .listing {
@@ -101,6 +184,8 @@ body {
   overflow: hidden;
   height: 540px;
   width: 520px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 .listing-image-container {
@@ -129,7 +214,6 @@ body {
   height: 22px;
   border-radius: 5px;
   padding: 5px 3px 2px 3px;
-  font-family: Noto Sans;
   font-weight: 300;
   font-size: 13px;
   text-align: center;
@@ -152,32 +236,27 @@ body {
 }
 
 .price {
-  font-family: Noto Sans;
   font-weight: 500;
   font-size: 32px;
 }
 
 .old-price {
-  font-family: Noto Sans;
   font-weight: 200;
   font-size: 24px;
   text-decoration: line-through;
 }
 
 .details {
-  font-family: Noto Sans;
   font-weight: 400;
   font-size: 24px;
 }
 
 .address {
-  font-family: Noto Sans;
   font-weight: 400;
   font-size: 16px;
 }
 
 .complex-name {
-  font-family: Noto Sans;
   font-weight: 600;
   font-size: 19px;
 }
@@ -188,7 +267,6 @@ body {
   border-radius: 5px;
   padding: 10px 16px;
   border: 1px solid rgb(255, 110, 66);
-  font-family: Noto Sans;
   font-weight: 600;
   font-size: 13px;
   color: rgb(253, 253, 253);
@@ -204,6 +282,14 @@ body {
   background-color: rgb(255, 110, 66);
 }
 
+.loading, .error {
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+.listing:hover {
+  transform: translateY(-5px);
+}
 @media (max-width: 1366px) {
   .wrapper {
     margin-right: 40px;

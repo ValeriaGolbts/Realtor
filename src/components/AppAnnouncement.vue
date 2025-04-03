@@ -8,7 +8,6 @@
                 :src="currentImage || defaultImage"
                 alt="Apartment photo"
                 class="main-image"
-                @error="handleImageError"
             />
           </div>
 
@@ -25,7 +24,6 @@
                     alt="Thumbnail"
                     class="thumbnail"
                     :class="{ 'active-thumbnail': currentImage === image }"
-                    @error="handleThumbnailError(index)"
                 />
               </div>
             </div>
@@ -43,7 +41,6 @@
             </div>
             <div class="price">
               {{ formattedPrice }} ₽ / мес
-              <span class="old-price" v-if="apartment.old_price">{{ formattedOldPrice }} ₽</span>
             </div>
 
             <div class="details-grid">
@@ -68,12 +65,8 @@
           </div>
 
           <div class="author">
-            <img
-                :src="apartment.user?.avatar"
-                alt="Author"
-                class="author-avatar"
-            />
-            <span>{{ apartment.user?.name || 'Автор не указан' }}</span>
+            <span v-if="apartment.owner">{{ apartment.owner.name }} {{ apartment.owner.patronymic }}</span>
+            <span v-else>Автор не указан</span>
           </div>
         </div>
       </section>
@@ -218,10 +211,17 @@ const handleReviewSubmitted = () => {
 
 const fetchApartmentData = async () => {
   try {
-    const response = await axios.get(`${thisUrl()}/realty/show/${apartmentId}`);
+    const response = await axios.get(`${thisUrl()}/realty/show/${apartmentId}`, {
+      params: {
+        with_user: true // Добавляем параметр, чтобы бэкенд включил данные пользователя
+      }
+    });
 
     if (response.data) {
       apartment.value = response.data;
+
+      // Проверяем структуру данных
+      console.log('Apartment data:', apartment.value);
 
       if (Array.isArray(apartment.value.images) && apartment.value.images.length > 0) {
         currentImage.value = apartment.value.images[0];
@@ -242,6 +242,10 @@ const fetchApartmentData = async () => {
     console.error('Ошибка при загрузке данных:', error);
     router.push('/not-found');
   }
+};
+
+const selectImage = (image) => {
+  currentImage.value = image || defaultImage.value;
 };
 
 const isReviewAuthor = (reviewUserId) => {
@@ -291,57 +295,46 @@ main {
 }
 
 .content-container {
-  margin: 6% 23px 0 160px;
-  width: 100%;
-  max-width: 1600px;
-  box-sizing: border-box;
-  transition: margin 0.3s ease;
+  margin-top: 6%;
+  margin-right: 23px;
+  margin-left: 160px;
 }
 
 .apartment-details {
   display: flex;
   gap: 20px;
   margin-bottom: 30px;
-  flex-wrap: wrap;
 }
 
 .image-gallery-container {
   flex: 1;
   min-width: 0;
-  width: 100%;
-  max-width: 790px;
+  width: 790px;
 }
 
 .main-image-wrapper {
   position: relative;
   margin-bottom: 10px;
-  width: 100%;
 }
 
 .main-image {
   width: 100%;
-  height: auto;
-  max-height: 500px;
-  object-fit: cover;
   border-radius: 8px;
-  transition: all 0.3s ease;
+  max-height: 450px;
 }
 
 .thumbnails-scroll-container {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .thumbnails-wrapper {
   display: flex;
   gap: 10px;
   padding-bottom: 10px;
-  flex-wrap: nowrap;
 }
 
 .thumbnail-container {
   cursor: pointer;
-  flex-shrink: 0;
 }
 
 .thumbnail {
@@ -350,24 +343,27 @@ main {
   object-fit: cover;
   border-radius: 4px;
   border: 2px solid transparent;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s;
 }
 
 .active-thumbnail {
   border-color: #ff6600;
 }
 
+.data {
+  font-size: 21px;
+}
+
 .details {
   flex: 1;
-  width: 100%;
-  max-width: 790px;
+  width: 790px;
 }
 
 .detail {
   background-color: black;
   border-radius: 8px;
   padding: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 1%;
   color: white;
   height: auto;
   min-height: 449px;
@@ -451,6 +447,7 @@ main {
 
 .show-phone-button {
   width: 100%;
+  max-width: 750px;
   height: 56px;
   padding: 10px;
   background-color: rgba(255, 120, 79, 1);
@@ -469,10 +466,11 @@ main {
 
 .author {
   display: flex;
-  align-items: center;
   gap: 10px;
-  padding-top: 15px;
-  border-top: 1px solid #dee2e6;
+  padding: 2%;
+  background-color: black;
+  color: white;
+  border-radius: 5px;
 }
 
 .author-avatar {

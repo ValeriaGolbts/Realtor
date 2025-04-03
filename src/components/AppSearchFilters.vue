@@ -199,6 +199,56 @@
               Применить
             </button>
           </div>
+          <div class="pagination" v-if="totalPages > 1">
+            <!-- Кнопка "Назад" -->
+            <button
+                :disabled="currentPage === 1"
+                @click="changePage(currentPage - 1)"
+                class="pagination-button"
+            >
+              <img
+                  src="./icons/Arrow-left.svg"
+                  alt="Назад"
+                  class="arrow-icon"
+                  :class="{ disabled: currentPage === 1 }"
+              />
+            </button>
+
+            <!-- Номера страниц -->
+            <div class="page-numbers">
+              <button
+                  v-for="page in visiblePages"
+                  :key="page"
+                  :class="{ active: page === currentPage }"
+                  @click="changePage(page)"
+                  class="page-number"
+              >
+                {{ page }}
+              </button>
+              <span class="dots" v-if="showEllipsisAfter">...</span>
+              <button
+                  v-if="showLastPage"
+                  @click="changePage(totalPages)"
+                  class="page-number"
+              >
+                {{ totalPages }}
+              </button>
+            </div>
+
+            <!-- Кнопка "Вперед" -->
+            <button
+                :disabled="currentPage === totalPages"
+                @click="changePage(currentPage + 1)"
+                class="pagination-button"
+            >
+              <img
+                  src="./icons/Arrow-right.svg"
+                  alt="Вперед"
+                  class="arrow-icon"
+                  :class="{ disabled: currentPage === totalPages }"
+              />
+            </button>
+          </div>
         </div>
 
         <!-- Объявления -->
@@ -258,57 +308,7 @@
         </div>
       </div>
 
-      <!-- Пагинация -->
-      <div class="pagination" v-if="totalPages > 1">
-        <!-- Кнопка "Назад" -->
-        <button
-            :disabled="currentPage === 1"
-            @click="changePage(currentPage - 1)"
-            class="pagination-button"
-        >
-          <img
-              src="./icons/Arrow-left.svg"
-              alt="Назад"
-              class="arrow-icon"
-              :class="{ disabled: currentPage === 1 }"
-          />
-        </button>
 
-        <!-- Номера страниц -->
-        <div class="page-numbers">
-          <button
-              v-for="page in visiblePages"
-              :key="page"
-              :class="{ active: page === currentPage }"
-              @click="changePage(page)"
-              class="page-number"
-          >
-            {{ page }}
-          </button>
-          <span class="dots" v-if="showEllipsisAfter">...</span>
-          <button
-              v-if="showLastPage"
-              @click="changePage(totalPages)"
-              class="page-number"
-          >
-            {{ totalPages }}
-          </button>
-        </div>
-
-        <!-- Кнопка "Вперед" -->
-        <button
-            :disabled="currentPage === totalPages"
-            @click="changePage(currentPage + 1)"
-            class="pagination-button"
-        >
-          <img
-              src="./icons/Arrow-right.svg"
-              alt="Вперед"
-              class="arrow-icon"
-              :class="{ disabled: currentPage === totalPages }"
-          />
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -337,7 +337,7 @@ const listings = ref([]);
 const searchQuery = ref('');
 const sortOrder = ref('asc');
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
+const itemsPerPage = ref(9);
 const loading = ref(false);
 const error = ref(null);
 const totalItems = ref(0);
@@ -356,7 +356,7 @@ const renovationTypes = ref([]);
 
 const priceRange = ref({
   min: 0,
-  max: 300000,
+  max: 1000000,
 });
 
 const availableRooms = ref([
@@ -374,7 +374,7 @@ const filters = ref({
   type_rent_id: null,
   type_realty_id: null,
   price_min: 0,
-  price_max: 300000,
+  price_max: priceRange.value.max,
   count_rooms: [],
   total_square_min: null,
   total_square_max: null,
@@ -400,7 +400,7 @@ const sliderTrackStyle = computed(() => {
 
 const visiblePages = computed(() => {
   const pages = [];
-  const maxVisible = 5;
+  const maxVisible = 5; // Максимальное количество видимых номеров страниц
   let start = 1;
   let end = totalPages.value;
 
@@ -490,7 +490,7 @@ const resetFilters = () => {
   filters.value = {
     type_rent_id: null,
     type_realty_id: null,
-    price_min: priceRange.value.min,
+    price_min: 0,
     price_max: priceRange.value.max,
     count_rooms: [],
     total_square_min: null,
@@ -605,7 +605,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Your existing styles remain unchanged */
 .dots {
   color: white;
   font-size: 18px;
@@ -651,7 +650,10 @@ onMounted(() => {
   display: flex;
   background-color: black;
 }
-
+.floor-inputs{
+  display: flex;
+  gap: 5px;
+}
 .content-container {
   margin-top: 6%;
   margin-right: 160px;
@@ -687,7 +689,8 @@ onMounted(() => {
   margin-right: 20px;
   flex-shrink: 0;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4%;
 }
 
 .filter-container {
@@ -901,7 +904,6 @@ button.active {
 }
 
 .listings-container {
-  background: rgba(17, 17, 17, 1);
   border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
@@ -917,12 +919,15 @@ button.active {
   border-radius: 5px;
   overflow: hidden;
   height: 540px;
-  width: 427px; /* Фиксированная ширина вместо calc(33.33% - 20px) */
+  width: 360px;
   box-sizing: border-box;
   flex-grow: 0;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
 }
-
+.listing:hover {
+  transform: translateY(-5px);
+}
 .listing-image-container {
   position: relative;
   width: 100%;
@@ -987,11 +992,6 @@ button.active {
   text-decoration: line-through;
 }
 
-.details {
-  font-family: Noto Sans, sans-serif;
-  font-weight: 400;
-  font-size: 24px;
-}
 
 .address {
   font-family: Noto Sans, sans-serif;
@@ -1003,28 +1003,6 @@ button.active {
   font-family: Noto Sans, sans-serif;
   font-weight: 600;
   font-size: 19px;
-}
-
-.view-all {
-  width: 220px;
-  height: 40px;
-  border-radius: 5px;
-  padding: 10px 16px;
-  border: 1px solid rgb(255, 110, 66);
-  font-family: Noto Sans, sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  color: rgb(253, 253, 253);
-  cursor: pointer;
-  transition: all 700ms ease;
-  background-color: rgb(17, 17, 17);
-  margin-left: 690px;
-  margin-top: 25px;
-  margin-bottom: 132px;
-}
-
-.view-all:hover {
-  background-color: rgb(255, 110, 66);
 }
 
 .no-listings {
@@ -1083,6 +1061,5 @@ button.active {
 }
 .listing {
   cursor: pointer;
-  /* остальные стили */
 }
 </style>
