@@ -120,7 +120,7 @@ const updateUserData = (updatedUser) => {
 .section-profile {
   background-color: #F2F0EE;
   width: 100%;
-  padding: 100px 180px 100px 125px;
+  padding: 100px 140px 100px 160px;
 }
 
 .accept-profile {
@@ -196,5 +196,90 @@ const updateUserData = (updatedUser) => {
   text-align: center;
   color: #ff4444;
   font-size: 16px;
+}
+
+/* Адаптив для 1366px */
+@media (max-width: 1366px) {
+  .section-profile {
+    padding: 60px 40px;
+  }
+
+  .user-info-block {
+    width: 250px;
+    min-height: 400px;
+    max-height: 400px;
+  }
+
+  .user-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .user-name {
+    font-size: 16px;
+  }
+
+  .user-links a {
+    font-size: 12px;
+    padding: 8px 0;
+  }
+
+  .content-block {
+    padding: 15px;
+  }
+}
+
+/* Адаптив для 360px  */
+@media (max-width: 360px) {
+  .section-profile {
+    padding: 20px 10px;
+  }
+
+  .accept-profile {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .user-info-block {
+    width: 100%;
+    min-height: auto;
+    max-height: none;
+    padding: 15px;
+  }
+
+  .user-info {
+    margin-bottom: 20px;
+  }
+
+  .user-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .user-name {
+    font-size: 14px;
+  }
+
+  .user-links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .user-links a {
+    font-size: 11px;
+    padding: 5px;
+  }
+
+  .content-block {
+    padding: 10px;
+    width: 100%;
+  }
+
+  .error-message {
+    font-size: 14px;
+    padding: 10px;
+  }
 }
 </style>

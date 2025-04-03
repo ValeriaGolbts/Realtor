@@ -199,26 +199,39 @@ function toggleFavorite(index) {
 body {
   margin: 0;
 }
-.head_main{
+
+main {
+  background-color: rgba(242, 238, 235, 1);
+  width: 100%;
+}
+
+.head_main {
   display: flex;
   flex-direction: column;
   align-items: center;
   height: 760px;
   background-image: url("./icons/Banner_main (1).svg");
+  background-size: cover;
+  background-position: center;
   justify-content: space-between;
+  width: 100%;
 }
-.decription{
-  margin-right: 160px;
-  margin-left: 160px;
+
+.decription {
+  margin: 0 160px;
   margin-top: 15%;
+  width: 100%;
+  max-width: 1600px;
+  box-sizing: border-box;
 }
-.decription1{
+
+.decription1 {
   color: white;
   font-size: 24px;
 }
-.decription2{
-  display: flex
-;
+
+.decription2 {
+  display: flex;
   flex-direction: column;
   color: white;
   flex-wrap: wrap;
@@ -226,87 +239,14 @@ body {
   font-size: 24px;
   margin-left: 123px;
 }
-.filter-container {
-  display: flex;
-  gap: 5px;
-  padding: 10px;
-  justify-content: center;
-  margin-bottom: 44px;
-}
 
-.filter-container select,
-.filter-container input {
-  padding: 8px 10px;
-  border: 1px solid #555;
-  border-radius: 3px;
-  font-size: 16px;
-  color: #ddd;
-  background-color: #333;
-  flex: 1;
-}
-
-.filter-container button {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.filter>select {
-  background-color: white;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("./icons/Vector.svg");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px;
-  padding-right: 30px;
-  color: #181818;
-  border: none;
-  transition: none;
-}
-
-.filter select:nth-child(1){
-  width: 74px;
-}
-.filter select:nth-child(2){
-  width: 156px;
-}
-.filter input:nth-child(1){
-  width: 186px;
-}
-.border{
-  margin-top: 5px;
-  border-right: 1px solid red;
-  height: 23px;
-}
-
-
-.filter-container select:invalid {
-  color: #999;
-}
-.filter{
-  display: flex;
-  background-color: white;
-  border-radius: 5px;
-  width: 726px;
-}
-.filter>input{
-  border: none;
-  background-color: white;
-}
-main {
-  background-color: rgba(242, 238, 235, 1);
-  width: 100%;
+.decription img {
+  max-width: 100%;
+  height: auto;
 }
 
 .main {
-  margin-right: 160px;
-  margin-left: 160px;
-  margin-top: 128px;
+  margin: 128px 160px;
 }
 
 .main:nth-child(1) {
@@ -321,16 +261,16 @@ main {
   font-weight: bold;
 }
 
-.advantages > div {
-  height: 389px;
-  width: 520px;
-}
-
 .advantages {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   margin-bottom: 128px;
+}
+
+.advantages > div {
+  height: 389px;
+  width: 520px;
 }
 
 .advantage1 {
@@ -425,22 +365,24 @@ main {
   margin-bottom: -12px;
 }
 
+.title-name {
+  margin-bottom: 20px;
+}
+
+.name {
+  color: rgba(17, 17, 17, 1);
+  font-family: Noto Sans;
+  font-weight: 500;
+  font-size: 21px;
+  text-align: left;
+}
+
 .listings-container {
   background: #f5f2ee;
   border-radius: 10px;
   width: 100%;
   display: flex;
   flex-direction: column;
-}
-
-
-.name {
-  color: rgba(17, 17, 17, 1);
-  margin-bottom: 20px;
-  font-family: Noto Sans;
-  font-weight: 500;
-  font-size: 21px;
-  text-align: left;
 }
 
 .listing {
@@ -477,7 +419,7 @@ main {
   width: 107px;
   height: 22px;
   border-radius: 5px;
-  padding: 5px 3px 2px 3px;
+  padding: 5px 3px 2px;
   font-family: Noto Sans;
   font-weight: 300;
   font-size: 13px;
@@ -566,7 +508,6 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
 }
 
 .app-text-desc {
@@ -578,7 +519,6 @@ main {
   font-weight: 600;
   font-size: 40px;
   color: rgba(17, 17, 17, 1);
-
 }
 
 .app-text p {
@@ -586,7 +526,6 @@ main {
   font-weight: 400;
   font-size: 16px;
   color: rgba(17, 17, 17, 1);
-
 }
 
 .app-stores {
@@ -619,4 +558,207 @@ main {
   height: 179px;
 }
 
+/* Адаптив для 1366px */
+@media (max-width: 1366px) {
+  .head_main {
+    height: 600px;
+  }
+
+  .decription {
+    margin: 0 40px;
+    margin-top: 10%;
+    max-width: 1286px; /* 1366px - 40px с каждой стороны */
+  }
+
+  .decription1,
+  .decription2 {
+    font-size: 20px;
+  }
+
+  .decription2 {
+    margin-left: 80px;
+  }
+
+  .main {
+    margin: 80px 40px;
+    max-width: 1286px;
+  }
+
+  .text {
+    font-size: 40px;
+  }
+
+  .advantages > div {
+    width: 400px;
+    height: 340px;
+  }
+
+  .advantage1 > div:nth-child(2) > p:nth-child(1),
+  .advantage2 > div:nth-child(2) > p:nth-child(1),
+  .advantage3 > div:nth-child(2) > p:nth-child(1) {
+    font-size: 18px;
+  }
+
+  .advantage1 > div:nth-child(2) > p:nth-child(2),
+  .advantage2 > div:nth-child(2) > p:nth-child(2),
+  .advantage3 > div:nth-child(2) > p:nth-child(2) {
+    font-size: 14px;
+  }
+
+  .listing {
+    height: 300px;
+  }
+
+  .price {
+    font-size: 28px;
+  }
+
+  .old-price {
+    font-size: 20px;
+  }
+
+  .details {
+    font-size: 20px;
+  }
+
+  .complex-name {
+    font-size: 17px;
+  }
+
+  .address {
+    font-size: 14px;
+  }
+
+  .app-section {
+    height: 220px;
+    margin-top: 80px;
+  }
+
+  .app-text-desc-selection {
+    font-size: 32px;
+  }
+
+  .store-icon {
+    width: 120px;
+  }
+
+  .qr-code img {
+    width: 140px;
+    height: 140px;
+  }
+}
+
+/* Адаптив для 360px */
+@media (max-width: 360px) {
+  .head_main {
+    height: 400px;
+  }
+
+  .decription {
+    margin: 0 10px;
+    margin-top: 20px;
+    max-width: 340px; /* 360px - 10px с каждой стороны */
+  }
+
+  .decription1,
+  .decription2 {
+    font-size: 16px;
+  }
+
+  .decription2 {
+    margin-left: 0; /* Убираем смещение, чтобы не выходило за пределы */
+  }
+
+  .main {
+    margin: 40px 10px;
+    max-width: 340px;
+  }
+
+  .text {
+    font-size: 24px;
+  }
+
+  .advantages {
+    margin-bottom: 40px;
+  }
+
+  .advantages > div {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+    padding: 15px 0;
+  }
+
+  .advantage1 > div:nth-child(2),
+  .advantage2 > div:nth-child(2),
+  .advantage3 > div:nth-child(2) {
+    margin-left: 10px;
+  }
+
+  .listing {
+    height: auto;
+    margin-bottom: 20px;
+  }
+
+  .listing-image-container {
+    height: 200px;
+  }
+
+  .listing-info {
+    padding: 10px;
+  }
+
+  .price {
+    font-size: 20px;
+  }
+
+  .old-price {
+    font-size: 16px;
+  }
+
+  .details {
+    font-size: 16px;
+  }
+
+  .complex-name {
+    font-size: 15px;
+  }
+
+  .address {
+    font-size: 12px;
+  }
+
+  .view-all {
+    width: 100%;
+  }
+
+  .app-section {
+    height: auto;
+    margin-top: 40px;
+    padding-left: 10px;
+    margin-bottom: 20px;
+  }
+
+  .app-text-desc-selection {
+    font-size: 20px;
+  }
+
+  .app-text p {
+    font-size: 14px;
+  }
+
+  .app-stores {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .store-icon {
+    width: 100px;
+  }
+
+  .qr-code img {
+    width: 120px;
+    height: 120px;
+  }
+}
 </style>

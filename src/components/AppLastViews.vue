@@ -238,4 +238,142 @@ body {
 .view-all:hover {
   background-color: rgb(255, 110, 66);
 }
+
+@media (max-width: 1366px) {
+  .wrapper {
+    margin-right: 40px;
+    margin-left: 40px;
+  }
+
+  .special-listing {
+    margin-bottom: 30px;
+  }
+
+  .special-listing .listing-image-container {
+    height: 300px;
+  }
+
+  .listings-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .listing {
+    height: 450px;
+  }
+
+  .listing-image-container {
+    height: 220px;
+  }
+
+  .price {
+    font-size: 28px;
+  }
+
+  .old-price {
+    font-size: 20px;
+  }
+
+  .details {
+    font-size: 20px;
+  }
+
+  .complex-name {
+    font-size: 17px;
+  }
+
+  .address {
+    font-size: 14px;
+  }
+
+  .view-all {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    margin-bottom: 80px;
+  }
+}
+
+@media (max-width: 360px) {
+  .wrapper {
+    margin-right: 10px;
+    margin-left: 10px;
+  }
+
+  .title-name {
+    margin-bottom: 20px;
+  }
+
+  .name {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .special-listing {
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+
+  .special-listing .listing-image-container {
+    width: 100%;
+    height: 200px;
+  }
+
+  .listings-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .listing {
+    height: auto;
+    min-height: 400px;
+  }
+
+  .listing-image-container {
+    height: 180px;
+  }
+
+  .listing-info {
+    padding: 10px;
+  }
+
+  .good-price {
+    width: 90px;
+    font-size: 11px;
+    padding: 4px 2px;
+  }
+
+  .heart-on-image {
+    width: 20px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .price {
+    font-size: 20px;
+  }
+
+  .old-price {
+    font-size: 16px;
+  }
+
+  .details {
+    font-size: 16px;
+  }
+
+  .complex-name {
+    font-size: 15px;
+  }
+
+  .address {
+    font-size: 12px;
+  }
+
+  .view-all {
+    width: 100%;
+    margin: 20px 0;
+    display: block;
+  }
+}
 </style>

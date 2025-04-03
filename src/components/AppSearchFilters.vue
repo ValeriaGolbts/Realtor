@@ -3,7 +3,7 @@
     <div class="content-container">
       <div class="title">Долгосрочная <br>и посуточная аренда</div>
       <div class="adv">
-        <span class="label">{{ totalItems }} ОБЪЯВЛЕНИЯ</span>
+        <span class="label"> {{ totalItems }} ОБЪЯВЛЕНИЯ</span>
       </div>
       <div class="search-and-sort">
         <input
@@ -230,8 +230,6 @@
               </div>
               <div class="listing-info">
                 <span class="price">{{ formatPrice(listing.price) }} / мес</span>
-                <span class="old-price" v-if="listing.old_price">{{ formatPrice(listing.old_price) }}</span>
-
                 <div class="listing-details">
                   <div class="detail-row">
                     <span class="detail-value">{{ formatRooms(listing.count_rooms) }}</span>

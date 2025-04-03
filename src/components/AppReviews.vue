@@ -309,4 +309,150 @@ const prevStep = () => {
 .step-1 {
   justify-content: center;
 }
+
+/* Адаптив для 1366px */
+@media (max-width: 1366px) {
+  .modal-content {
+    width: 500px;
+    padding: 20px;
+    min-height: 300px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+  }
+
+  .modal-subtitle {
+    font-size: 14px;
+    margin-top: 15px;
+  }
+
+  .rating-item p {
+    font-size: 16px;
+  }
+
+  .stars img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .rating-section {
+    margin: 15px 0;
+  }
+
+  .review-textarea {
+    height: 100px;
+    padding: 10px;
+    font-size: 14px;
+    margin: 15px 0;
+  }
+
+  .modal-close {
+    font-size: 18px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .btn-back {
+    font-size: 14px;
+    padding: 8px 15px;
+  }
+
+  .btn-next,
+  .btn-submit {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .error-message {
+    font-size: 12px;
+  }
+}
+
+/* Адаптив для 360px (мобильные устройства) */
+@media (max-width: 360px) {
+  .modal-overlay {
+    align-items: flex-start;
+  }
+
+  .modal-content {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 15px;
+    border-radius: 0;
+    min-height: 100%;
+  }
+
+  .modal-title {
+    font-size: 18px;
+  }
+
+  .modal-subtitle {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .rating-section {
+    margin: 10px 0;
+  }
+
+  .rating-item {
+    gap: 10px;
+  }
+
+  .rating-item p {
+    font-size: 14px;
+  }
+
+  .stars {
+    gap: 5px;
+  }
+
+  .stars img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .review-textarea {
+    height: 150px;
+    padding: 10px;
+    font-size: 12px;
+    margin: 10px 0;
+  }
+
+  .modal-close {
+    font-size: 16px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .error-message {
+    font-size: 12px;
+    margin: 5px 0;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .btn-back {
+    font-size: 12px;
+    padding: 8px;
+    width: 100%;
+  }
+
+  .btn-next,
+  .btn-submit {
+    padding: 10px;
+    font-size: 12px;
+    width: 100%;
+  }
+
+  .step-1, .step-2 {
+    justify-content: flex-start;
+  }
+}
 </style>

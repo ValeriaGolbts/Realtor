@@ -257,7 +257,6 @@ const formatPhone = () => {
   validatePhone()
 }
 
-// Валидации для пароля
 const validatePassword = () => {
   if (!passwordForm.value.password1) {
     passwordErrors.value.password1 = 'Новый пароль обязателен'
@@ -284,7 +283,6 @@ const validatePasswordConfirmation = () => {
   return true
 }
 
-// Загрузка данных профиля
 onMounted(async () => {
   try {
     const response = await axiosInstance.get('/user/profile')
@@ -299,7 +297,6 @@ onMounted(async () => {
   }
 })
 
-// Сохранение профиля
 const saveProfile = async () => {
   profileError.value = ''
   profileSuccess.value = false
@@ -350,7 +347,6 @@ const saveProfile = async () => {
   }
 }
 
-// Смена пароля
 const changePassword = async () => {
   passwordError.value = ''
   passwordSuccess.value = false
@@ -520,5 +516,112 @@ span .error-message {
 .input-error {
   border-color: #ff4444 !important;
   background-color: #ffeeee !important;
+}
+
+/* Адаптив для 1366px */
+@media (max-width: 1366px) {
+  .edit-profile {
+    padding: 15px;
+  }
+
+  .edit-profile h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+
+  .tabs button {
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+  }
+
+  .modal-input {
+    padding: 8px 5px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .modal-button {
+    padding: 10px;
+    font-size: 12px;
+    margin-bottom: 25px;
+  }
+
+  .error-message {
+    font-size: 11px;
+    margin-top: -15px;
+    margin-bottom: 10px;
+  }
+
+  span.error-message {
+    font-size: 11px;
+  }
+
+  .success-message {
+    font-size: 14px;
+  }
+}
+
+/* Адаптив для 360px (мобильные устройства) */
+@media (max-width: 360px) {
+  .edit-profile {
+    padding: 10px;
+  }
+
+  .edit-profile h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  .tabs {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .tabs button {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  .modal-input {
+    padding: 8px;
+    font-size: 12px;
+    margin-bottom: 15px;
+  }
+
+  .modal-button {
+    padding: 10px;
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .error-message {
+    font-size: 10px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+
+  span.error-message {
+    font-size: 10px;
+    margin-top: 5px;
+  }
+
+  .success-message {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
 }
 </style>

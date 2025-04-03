@@ -28,7 +28,7 @@
           </p>
           <p class="address">{{ realty.address }}</p>
           <div class="actions">
-            <button class="view-reviews">СМОТРЕТЬ ОТЗЫВЫ</button>
+            <button class="view-reviews" @click="goToAnnouncement(realty.id)">Перейти к объявлению</button>
             <button class="delete-btn" @click="showDeleteModal(realty.id)">Удалить</button>
           </div>
         </div>
@@ -52,11 +52,13 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { thisUrl } from '../url.js';
+import { useRouter } from 'vue-router';
 
 const realties = ref([]);
 const error = ref(null);
 const showModal = ref(false);
 const realtyToDelete = ref(null);
+const router = useRouter();
 
 const showDeleteModal = (realtyId) => {
   realtyToDelete.value = realtyId;
@@ -73,6 +75,10 @@ const confirmDelete = async () => {
     await deleteRealty(realtyToDelete.value);
     hideDeleteModal();
   }
+};
+
+const goToAnnouncement = (id) => {
+  router.push(`/announ/${id}`);
 };
 
 const fetchRealties = async () => {
@@ -171,7 +177,7 @@ onMounted(fetchRealties);
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 10px 10px 5px rgba(204, 204, 204, 0.5);
 }
 
 .listing-image-container {
@@ -234,6 +240,13 @@ onMounted(fetchRealties);
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  transition: all 300ms ease;
+}
+
+.view-reviews:hover,
+.delete-btn:hover {
+  color: white;
+  background-color: #FF784F;
 }
 
 .view-reviews {
@@ -304,5 +317,130 @@ onMounted(fetchRealties);
   background: #ff4a2b;
   border: 1px solid #ff4a2b;
   color: white;
+}
+
+/* Адаптив для 1366px */
+@media (max-width: 1366px) {
+  .realties {
+    padding: 15px;
+  }
+
+  .realty-card {
+    flex-direction: row;
+  }
+
+  .listing-image-container {
+    width: 250px;
+    height: 150px;
+  }
+
+  .realty-info {
+    padding: 10px;
+  }
+
+  .price {
+    font-size: 16px;
+  }
+
+  .details {
+    font-size: 12px;
+  }
+
+  .address {
+    font-size: 14px;
+  }
+
+  .view-reviews,
+  .delete-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .modal {
+    max-width: 350px;
+    padding: 15px;
+  }
+}
+
+/* Адаптив для 360px (мобильные устройства) */
+@media (max-width: 360px) {
+  .realties {
+    padding: 10px;
+    min-height: auto;
+  }
+
+  h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  .empty-message {
+    padding: 20px;
+    font-size: 14px;
+  }
+
+  .realty-card {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .listing-image-container {
+    width: 100%;
+    height: 180px;
+  }
+
+  .realty-info {
+    padding: 10px;
+  }
+
+  .price {
+    font-size: 16px;
+  }
+
+  .details {
+    font-size: 12px;
+  }
+
+  .address {
+    font-size: 12px;
+    margin-bottom: 15px;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .view-reviews,
+  .delete-btn {
+    width: 100%;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .modal {
+    max-width: 90%;
+    padding: 15px;
+  }
+
+  .modal h3 {
+    font-size: 16px;
+  }
+
+  .modal p {
+    font-size: 14px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .modal-cancel,
+  .modal-confirm {
+    width: 100%;
+    padding: 10px;
+    font-size: 12px;
+  }
 }
 </style>

@@ -306,4 +306,125 @@ const logout = () => {
 .fade-leave-to {
   opacity: 0;
 }
+
+/* Адаптив для 1366px */
+@media (max-width: 1366px) {
+  .modal-content {
+    width: 300px;
+    padding: 30px 20px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .modal-input {
+    padding: 8px 5px;
+    font-size: 14px;
+  }
+
+  .input-wrapper {
+    margin-bottom: 12px;
+  }
+
+  .modal-checkbox {
+    font-size: 14px;
+    margin-bottom: 25px;
+    margin-top: 20px;
+  }
+
+  .modal-button {
+    padding: 10px;
+    font-size: 12px;
+    margin-bottom: 25px;
+  }
+
+  .modal-close {
+    font-size: 18px;
+    top: 12px;
+    right: 12px;
+  }
+
+  .modal-link {
+    font-size: 14px;
+    margin-top: 12px;
+  }
+
+  .modal-policy {
+    font-size: 12px;
+    margin-top: 8px;
+  }
+
+  .error-message {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+}
+
+/* Адаптив для 360px (мобильные устройства) */
+@media (max-width: 360px) {
+  .modal-overlay {
+    align-items: flex-start;
+  }
+
+  .modal-content {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 20px 15px;
+    border-radius: 0;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .modal-input {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .input-wrapper {
+    margin-bottom: 10px;
+  }
+
+  .modal-checkbox {
+    font-size: 12px;
+    margin-bottom: 20px;
+    margin-top: 15px;
+  }
+
+  .modal-button {
+    padding: 10px;
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .modal-close {
+    font-size: 16px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .modal-text {
+    gap: 15px;
+  }
+
+  .modal-link {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .modal-policy {
+    font-size: 10px;
+    margin-top: 5px;
+  }
+
+  .error-message {
+    font-size: 10px;
+    margin-top: 3px;
+  }
+}
 </style>

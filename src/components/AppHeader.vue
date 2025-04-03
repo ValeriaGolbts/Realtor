@@ -26,7 +26,6 @@
                 <router-link class="menu-item" to="/profile">Мои объявления</router-link>
                 <a href="#" class="menu-item" @click.prevent="goToFavorites">Избранное</a>
                 <a href="#" class="menu-item" @click.prevent="goToEditProfile">Редактировать профиль</a>
-                <a href="#" class="menu-item" @click.prevent="openReviewModal">Оставить отзыв</a>
               </div>
               <button class="logout-button" @click="logout">Выйти</button>
             </div>
@@ -45,11 +44,6 @@
         @auth-success="handleAuthSuccess"
     />
 
-    <ReviewModal
-        v-model:isOpen="isReviewModalOpen"
-        :realtyId="currentRealtyId"
-    />
-
   </header>
 </template>
 
@@ -58,23 +52,15 @@ import {ref, onMounted, onBeforeUnmount, nextTick} from 'vue';
 import Registration from './AppRegistration.vue';
 import Authentication from './AppAuthentication.vue';
 import Cookies from 'js-cookie';
-import ReviewModal from './AppReviews.vue';
 import { useRouter } from 'vue-router';
 import { thisUrl } from '../url.js';
 
-const currentRealtyId = ref(15);
 const isModalOpenReg = ref(false);
 const isModalOpenAuth = ref(false);
 const isAuthenticated = ref(false);
 const isMenuOpen = ref(false);
 const dropdownMenu = ref(null);
-const isReviewModalOpen = ref(false);
 const router = useRouter();
-
-const openReviewModal = () => {
-  isReviewModalOpen.value = true;
-  isMenuOpen.value = false;
-};
 
 onMounted(() => {
   const token = Cookies.get('authToken');
@@ -322,5 +308,144 @@ header {
 .dropdown-leave-from {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (max-width: 1366px) {
+  header {
+    width: 95%;
+    margin-right: 25px;
+    margin-left: 40px;
+    justify-content: space-around;
+    padding: 0;
+  }
+
+  .title {
+    width: 20%;
+  }
+
+  .links {
+    font-size: 14px;
+    gap: 15px;
+  }
+
+  .authreg {
+    width: 25%;
+  }
+
+  .auth-buttons > button {
+    width: 70px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .auth-buttons button:nth-child(2) {
+    width: 160px;
+  }
+
+  .create-ad {
+    width: 160px;
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .dropdown-menu {
+    width: 280px;
+    right: -20px;
+  }
+
+  .menu-item {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  header {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+    margin: 10px;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .title {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .city {
+    font-size: 14px;
+  }
+
+  .links {
+    width: 100%;
+    justify-content: flex-start;
+    font-size: 12px;
+    gap: 10px;
+  }
+
+  .authreg {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .auth-buttons {
+    width: 100%;
+    justify-content: space-between;
+    gap: 5px;
+  }
+
+  .auth-buttons > button {
+    width: 48%;
+    height: 30px;
+    font-size: 10px;
+  }
+
+  .auth-buttons button:nth-child(2) {
+    width: 48%;
+  }
+
+  .user-menu {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .create-ad {
+    width: 60%;
+    padding: 6px;
+    font-size: 12px;
+    margin-right: 0;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .dropdown-menu {
+    width: 100%;
+    right: 0;
+    top: 40px;
+    padding: 10px;
+  }
+
+  .menu-items {
+    gap: 8px;
+  }
+
+  .menu-item {
+    font-size: 12px;
+  }
+
+  .logout-button {
+    font-size: 12px;
+  }
 }
 </style>

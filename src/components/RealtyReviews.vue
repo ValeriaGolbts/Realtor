@@ -217,4 +217,140 @@ h2 {
   text-align: center;
   padding: 20px;
 }
+
+/* Адаптив для 1366px */
+@media (max-width: 1366px) {
+  .feedback-container {
+    max-width: 100%;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+
+  h2 {
+    font-size: 18px;
+    margin: 20px 0 10px;
+  }
+
+  .rating-summary {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+  }
+
+  .overall-rating {
+    gap: 10px;
+  }
+
+  .stars {
+    font-size: 16px;
+  }
+
+  .rating-value {
+    font-size: 20px;
+  }
+
+  .feedback-item {
+    padding: 15px;
+  }
+
+  .feedback-header strong {
+    font-size: 14px;
+  }
+
+  .feedback-header span {
+    font-size: 12px;
+  }
+
+  .feedback-rating {
+    font-size: 14px;
+  }
+
+  .feedback-comment {
+    font-size: 14px;
+  }
+
+  .delete-feedback {
+    font-size: 12px;
+  }
+}
+
+/* Адаптив для 360px (мобильные устройства) */
+@media (max-width: 360px) {
+  .feedback-container {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  h2 {
+    font-size: 16px;
+    margin: 15px 0 10px;
+  }
+
+  .rating-summary {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+  }
+
+  .overall-rating {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .stars {
+    font-size: 14px;
+  }
+
+  .rating-value {
+    font-size: 18px;
+  }
+
+  .feedback-list {
+    gap: 15px;
+  }
+
+  .feedback-item {
+    padding: 10px;
+  }
+
+  .feedback-header {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .feedback-header strong {
+    font-size: 14px;
+  }
+
+  .feedback-header span {
+    font-size: 12px;
+  }
+
+  .feedback-rating {
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+
+  .feedback-comment {
+    font-size: 12px;
+    margin: 5px 0;
+  }
+
+  .delete-feedback {
+    font-size: 12px;
+    padding: 5px 0;
+  }
+
+  .error-message {
+    font-size: 12px;
+    padding: 10px;
+  }
+}
 </style>

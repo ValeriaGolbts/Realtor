@@ -26,15 +26,12 @@
 
         <div class="realty-info">
           <h3 class="price">{{ formatPrice(realty.price) }} ₽ / МЕС</h3>
-          <p class="original-price" v-if="realty.original_price">
-            {{ formatPrice(realty.original_price) }} ₽
-          </p>
           <p class="details" v-if="realty.count_rooms && realty.total_square && realty.floor">
             {{ getRoomCountText(realty.count_rooms) }} · {{ realty.total_square }} м² · {{ realty.floor }} этаж
           </p>
           <p class="address">{{ realty.address }}</p>
           <div class="actions">
-            <button class="view-reviews">СМОТРЕТЬ ОТЗЫВЫ</button>
+            <button class="view-reviews" @click="goToAnnouncement(realty.id)">Перейти к объявлению</button>
           </div>
         </div>
       </div>
@@ -45,7 +42,7 @@
         <h3>Подтверждение удаления</h3>
         <p>Вы уверены, что хотите удалить это объявление из избранного?</p>
         <div class="modal-actions">
-          <button class="modal-cancel" @click="hideRemoveModal">Отмена</button>
+          <button class="modal-canc el" @click="hideRemoveModal">Отмена</button>
           <button class="modal-confirm" @click="confirmRemove">Удалить</button>
         </div>
       </div>
@@ -58,11 +55,18 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { thisUrl } from '../url.js';
+import { useRouter } from 'vue-router';
 
 const favorites = ref([]);
 const error = ref(null);
 const showModal = ref(false);
 const realtyToRemove = ref(null);
+const router = useRouter();
+
+// Добавляем метод goToAnnouncement
+const goToAnnouncement = (id) => {
+  router.push(`/announ/${id}`);
+};
 
 const showRemoveModal = (realtyId) => {
   realtyToRemove.value = realtyId;
@@ -183,7 +187,7 @@ onMounted(fetchFavorites);
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 10px 10px 5px rgba(204, 204, 204, 0.5);
 }
 
 .listing-image-container {
@@ -269,6 +273,12 @@ onMounted(fetchFavorites);
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  transition: all 300ms ease;
+}
+
+.view-reviews:hover {
+  color: white;
+  background-color: #FF784F;
 }
 
 .modal-overlay {

@@ -286,49 +286,62 @@ main {
 .container {
   display: flex;
   background-color: rgba(242, 240, 238, 1);
+  width: 100%;
+  min-height: 100vh;
 }
 
 .content-container {
-  margin-top: 6%;
-  margin-right: 23px;
-  margin-left: 160px;
+  margin: 6% 23px 0 160px;
+  width: 100%;
+  max-width: 1600px;
+  box-sizing: border-box;
+  transition: margin 0.3s ease;
 }
 
 .apartment-details {
   display: flex;
   gap: 20px;
   margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
 .image-gallery-container {
   flex: 1;
   min-width: 0;
-  width: 790px;
+  width: 100%;
+  max-width: 790px;
 }
 
 .main-image-wrapper {
   position: relative;
   margin-bottom: 10px;
+  width: 100%;
 }
 
 .main-image {
   width: 100%;
+  height: auto;
+  max-height: 500px;
   object-fit: cover;
   border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .thumbnails-scroll-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .thumbnails-wrapper {
   display: flex;
   gap: 10px;
   padding-bottom: 10px;
+  flex-wrap: nowrap;
 }
 
 .thumbnail-container {
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .thumbnail {
@@ -337,20 +350,17 @@ main {
   object-fit: cover;
   border-radius: 4px;
   border: 2px solid transparent;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s ease;
 }
 
 .active-thumbnail {
   border-color: #ff6600;
 }
 
-.data {
-  font-size: 21px;
-}
-
 .details {
   flex: 1;
-  width: 790px;
+  width: 100%;
+  max-width: 790px;
 }
 
 .detail {
@@ -359,7 +369,36 @@ main {
   padding: 20px;
   margin-bottom: 20px;
   color: white;
-  height: 449px;
+  height: auto;
+  min-height: 449px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.rating {
+  margin-bottom: 3%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rating div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.leave-review-link {
+  color: #ff6600;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.leave-review-link:hover {
+  text-decoration: underline;
 }
 
 .price {
@@ -379,6 +418,7 @@ main {
   display: flex;
   gap: 15px;
   margin: 20px 0;
+  flex-wrap: wrap;
 }
 
 .detail-item {
@@ -387,6 +427,14 @@ main {
   text-align: center;
   border: 1px solid rgba(67, 67, 67, 1);
   border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.data {
+  font-size: 21px;
 }
 
 .detail-label {
@@ -398,12 +446,11 @@ main {
 .address-text {
   margin: 15px 0;
   font-size: 16px;
-  margin-bottom: 17%;
+  flex-grow: 1;
 }
 
 .show-phone-button {
   width: 100%;
-  max-width: 750px;
   height: 56px;
   padding: 10px;
   background-color: rgba(255, 120, 79, 1);
@@ -412,8 +459,12 @@ main {
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
-  margin-bottom: 15px;
   font-size: 13px;
+  transition: background-color 0.3s ease;
+}
+
+.show-phone-button:hover {
+  background-color: #ff6600;
 }
 
 .author {
@@ -448,30 +499,6 @@ ul {
 
 li {
   margin-bottom: 8px;
-  position: relative;
-}
-
-.rating {
-  margin-bottom: 3%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.rating div {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.leave-review-link {
-  color: #ff6600;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.leave-review-link:hover {
-  text-decoration: underline;
 }
 
 .reviews-section {
@@ -486,6 +513,8 @@ li {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .reviews-header h2 {
@@ -534,6 +563,8 @@ li {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .review-author {
@@ -555,15 +586,11 @@ li {
   cursor: pointer;
   font-size: 14px;
   padding: 5px;
+  transition: color 0.2s ease;
 }
 
 .delete-review-btn:hover {
   text-decoration: underline;
-}
-
-.review-date {
-  color: #666;
-  font-size: 14px;
 }
 
 .review-rating {
@@ -590,13 +617,201 @@ li {
   color: #666;
 }
 
-@media (max-width: 768px) {
+/* Адаптивные стили */
+@media (max-width: 1366px) {
   .apartment-details {
-    flex-direction: column;
+    margin-top: 50px;
+  }
+
+  .content-container {
+    margin: 4% 20px 0 40px;
+  }
+
+  .image-gallery-container,
+  .details {
+    max-width: 600px;
+  }
+
+  .main-image {
+    max-height: 400px;
+  }
+
+  .thumbnail {
+    width: 120px;
+    height: 70px;
+  }
+
+  .detail {
+    min-height: 400px;
+    padding: 15px;
+  }
+
+  .price {
+    font-size: 22px;
   }
 
   .details-grid {
-    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .detail-item {
+    width: 100px;
+  }
+
+  .data {
+    font-size: 18px;
+  }
+
+  .detail-label {
+    font-size: 15px;
+  }
+
+  .footer_contacts {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-container {
+    margin: 3% 15px 0 20px;
+  }
+
+  .apartment-details {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .image-gallery-container,
+  .details {
+    max-width: 100%;
+  }
+
+  .main-image {
+    max-height: 350px;
+  }
+
+  .thumbnail {
+    width: 100px;
+    height: 60px;
+  }
+
+  .detail {
+    min-height: unset;
+    padding: 15px;
+  }
+
+  .details-grid {
+    justify-content: space-between;
+  }
+
+  .detail-item {
+    width: 30%;
+    min-width: 90px;
+  }
+
+  .address-text {
+    margin-bottom: 15px;
+  }
+
+  .show-phone-button {
+    height: 48px;
+  }
+
+  .reviews-section {
+    padding: 15px;
+  }
+
+  .reviews-header h2 {
+    font-size: 20px;
+  }
+
+  .review-item {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .content-container {
+    margin: 2% 10px 0 10px;
+  }
+
+  .main-image {
+    max-height: 250px;
+  }
+
+  .thumbnail {
+    width: 80px;
+    height: 50px;
+  }
+
+  .detail {
+    padding: 10px;
+  }
+
+  .price {
+    font-size: 20px;
+  }
+
+  .old-price {
+    font-size: 14px;
+  }
+
+  .details-grid {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .detail-item {
+    width: 100%;
+    height: auto;
+    padding: 10px 0;
+  }
+
+  .data {
+    font-size: 16px;
+  }
+
+  .detail-label {
+    font-size: 14px;
+  }
+
+  .address-text {
+    font-size: 14px;
+    margin: 10px 0;
+  }
+
+  .show-phone-button {
+    height: 40px;
+    font-size: 12px;
+  }
+
+  .author-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  .reviews-header h2 {
+    font-size: 18px;
+  }
+
+  .stars {
+    font-size: 16px;
+  }
+
+  .rating-value {
+    font-size: 16px;
+  }
+
+  .review-item {
+    padding: 10px;
+  }
+
+  .review-text {
+    font-size: 14px;
   }
 }
 </style>
