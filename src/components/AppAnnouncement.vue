@@ -114,7 +114,7 @@
               <div class="review-actions">
                 <button
                     v-if="isReviewAuthor(review.user.id)"
-                    @click="deleteReview(review.id)"
+                    @click="openDeleteModal(review.id)"
                     class="delete-review-btn"
                 >
                   Удалить
@@ -134,6 +134,7 @@
         </div>
       </section>
     </div>
+
     <ReviewModal
         v-if="apartment.id"
         :isOpen="reviewModalOpen"
@@ -141,6 +142,18 @@
         @update:isOpen="reviewModalOpen = $event"
         @review-submitted="handleReviewSubmitted"
     />
+
+    <!-- Модальное окно для удаления отзыва -->
+    <div v-if="deleteModalOpen" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Удаление отзыва</h3>
+        <p>Вы уверены, что хотите удалить этот отзыв?</p>
+        <div class="modal-actions">
+          <button class="modal-cancel" @click="closeDeleteModal">Отмена</button>
+          <button class="modal-confirm" @click="confirmDeleteReview">Удалить</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -156,6 +169,8 @@ const route = useRoute();
 const router = useRouter();
 const apartmentId = route.params.id;
 const reviewModalOpen = ref(false);
+const deleteModalOpen = ref(false);
+const selectedReviewId = ref(null);
 const defaultImage = ref('/images/default-apartment.jpg');
 const currentUserId = ref(Cookies.get('userId'));
 
@@ -177,12 +192,12 @@ const apartment = ref({
   type_rent: null,
   type_realty: null,
   type_repair: null,
-  reviews: []
+  reviews: [],
+  owner: {}
 });
 
 const currentImage = ref('');
 const showPhone = ref(false);
-const isOwner = ref(false);
 
 const formattedPrice = computed(() => {
   return new Intl.NumberFormat('ru-RU').format(apartment.value.price);
@@ -196,11 +211,6 @@ const averageRating = computed(() => {
   return sum / apartment.value.reviews.length;
 });
 
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString('ru-RU', options);
-};
-
 const openReviewModal = () => {
   reviewModalOpen.value = true;
 };
@@ -213,15 +223,12 @@ const fetchApartmentData = async () => {
   try {
     const response = await axios.get(`${thisUrl()}/realty/show/${apartmentId}`, {
       params: {
-        with_user: true // Добавляем параметр, чтобы бэкенд включил данные пользователя
+        with_user: true
       }
     });
 
     if (response.data) {
       apartment.value = response.data;
-
-      // Проверяем структуру данных
-      console.log('Apartment data:', apartment.value);
 
       if (Array.isArray(apartment.value.images) && apartment.value.images.length > 0) {
         currentImage.value = apartment.value.images[0];
@@ -252,21 +259,31 @@ const isReviewAuthor = (reviewUserId) => {
   return currentUserId.value && parseInt(currentUserId.value) === reviewUserId;
 };
 
-const deleteReview = async (reviewId) => {
+const openDeleteModal = (reviewId) => {
+  selectedReviewId.value = reviewId;
+  deleteModalOpen.value = true;
+};
+
+const closeDeleteModal = () => {
+  deleteModalOpen.value = false;
+  selectedReviewId.value = null;
+};
+
+const confirmDeleteReview = async () => {
   try {
     const token = Cookies.get('authToken');
     if (!token) {
       alert('Необходима авторизация');
+      closeDeleteModal();
       return;
     }
 
-    if (confirm('Вы уверены, что хотите удалить этот отзыв?')) {
-      await axios.delete(`${thisUrl()}/feedback/delete/${reviewId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+    await axios.delete(`${thisUrl()}/feedback/delete/${selectedReviewId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      await fetchApartmentData();
-    }
+    await fetchApartmentData();
+    closeDeleteModal();
   } catch (error) {
     console.error('Ошибка при удалении отзыва:', error);
     alert('Не удалось удалить отзыв');
@@ -321,6 +338,7 @@ main {
   width: 100%;
   border-radius: 8px;
   max-height: 450px;
+  object-fit: cover;
 }
 
 .thumbnails-scroll-container {
@@ -348,10 +366,6 @@ main {
 
 .active-thumbnail {
   border-color: #ff6600;
-}
-
-.data {
-  font-size: 21px;
 }
 
 .details {
@@ -401,13 +415,6 @@ main {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 15px;
-}
-
-.old-price {
-  text-decoration: line-through;
-  color: #6c757d;
-  margin-left: 10px;
-  font-size: 16px;
 }
 
 .details-grid {
@@ -615,6 +622,77 @@ li {
   color: #666;
 }
 
+/* Стили для модального окна */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+  font-size: 20px;
+  color: #343a40;
+  margin-bottom: 15px;
+}
+
+.modal-content p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-cancel {
+  background: none;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.modal-cancel:hover {
+  background-color: #f8f9fa;
+}
+
+.modal-confirm {
+  background-color: #ff4a2b;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.modal-confirm:hover {
+  background-color: #e6391a;
+}
+
 /* Адаптивные стили */
 @media (max-width: 1366px) {
   .apartment-details {
@@ -662,10 +740,6 @@ li {
 
   .detail-label {
     font-size: 15px;
-  }
-
-  .footer_contacts {
-    font-size: 32px;
   }
 }
 
@@ -726,6 +800,10 @@ li {
   .review-item {
     padding: 15px;
   }
+
+  .modal-content {
+    max-width: 90%;
+  }
 }
 
 @media (max-width: 360px) {
@@ -748,10 +826,6 @@ li {
 
   .price {
     font-size: 20px;
-  }
-
-  .old-price {
-    font-size: 14px;
   }
 
   .details-grid {
@@ -810,6 +884,25 @@ li {
 
   .review-text {
     font-size: 14px;
+  }
+
+  .modal-content {
+    max-width: 85%;
+    padding: 15px;
+  }
+
+  .modal-content h3 {
+    font-size: 18px;
+  }
+
+  .modal-content p {
+    font-size: 14px;
+  }
+
+  .modal-cancel,
+  .modal-confirm {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 </style>

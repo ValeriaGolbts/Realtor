@@ -1062,4 +1062,30 @@ button.active {
 .listing {
   cursor: pointer;
 }
+@media (max-width: 1366px) {
+  .filter-container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 360px;
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .listing {
+    display: flex;
+    flex-direction: column;
+    background: rgb(253, 253, 253);
+    border-radius: 5px;
+    overflow: hidden;
+    height: 500px;
+    width: 323px;
+    box-sizing: border-box;
+    flex-grow: 0;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+}
 </style>

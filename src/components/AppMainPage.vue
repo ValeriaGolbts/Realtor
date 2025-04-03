@@ -95,22 +95,6 @@
         <button class="view-all" @click="$router.push('/filters-search')">СМОТРЕТЬ ВСЕ</button>
       </div>
 
-      <div class="app-section">
-        <div class="app-text">
-          <div class="app-text-desc">
-            <span class="app-text-desc-selection">В приложении ещё удобнее</span>
-            <p>Следите за актуальными и выгодными предложениями</p>
-          </div>
-          <div class="app-stores">
-            <img src="@/assets/Google_Play_Black.png" alt="Google Play" class="store-icon">
-            <img src="@/assets/App_Store_Black.png" alt="App Store" class="store-icon">
-            <img src="@/assets/RuStore_Black.png" alt="RuStore" class="store-icon">
-          </div>
-        </div>
-        <div class="qr-code">
-          <img src="@/assets/qr-code.png" alt="QR-код для скачивания приложения">
-        </div>
-      </div>
     </div>
   </main>
 

@@ -351,6 +351,7 @@ body {
   .wrapper {
     margin-right: 40px;
     margin-left: 40px;
+    height: 1452px;
   }
 
   .special-listing {
