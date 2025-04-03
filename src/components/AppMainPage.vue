@@ -142,12 +142,23 @@ const listings = ref([]);
 const loading = ref(false);
 const error = ref(null);
 
+// Функция для перемешивания массива (алгоритм Фишера-Йетса)
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 const fetchTopListings = async () => {
   loading.value = true;
   error.value = null;
   try {
     const response = await axios.get(`${thisUrl()}/realty/filter`);
-    listings.value = response.data.listings || [];
+    // Перемешиваем полученные объявления
+    listings.value = shuffleArray(response.data.listings || []);
   } catch (err) {
     error.value = 'Не удалось загрузить топовые предложения';
   } finally {
@@ -201,9 +212,11 @@ const toggleFavorite = async (listingId, index) => {
     }
   }
 };
+
 const goToAnnouncement = (id) => {
   router.push(`/announ/${id}`);
 };
+
 onMounted(() => {
   fetchTopListings();
 });
@@ -506,6 +519,7 @@ main {
   cursor: pointer;
   transition: all 500ms ease;
   margin: 0 auto;
+  margin-bottom: 4%;
 }
 
 .view-all:hover {

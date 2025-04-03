@@ -332,7 +332,7 @@ const validateAndPublish = () => {
 
   if (!errors.description && !errors.photos) {
     publishAd();
-    router.push('/profile')
+    router.push('/filters-search')
   }
 };
 

@@ -13,12 +13,12 @@
             class="address-search-input"
             @input="handleSearch"
         />
-        <img
-            src="./icons/sort.svg"
-            alt="Сортировка"
-            class="sort-icon"
-            @click="toggleSortOrder"
-        />
+        <button @click="toggleSortOrder">
+          Сортировка:
+          <span v-if="sortOrder === 'random'">Случайный порядок</span>
+          <span v-else-if="sortOrder === 'asc'">По возрастанию цены</span>
+          <span v-else-if="sortOrder === 'desc'">По убыванию цены</span>
+        </button>
       </div>
       <div class="main-content">
         <!-- Фильтры -->
@@ -437,7 +437,7 @@ const fetchData = async () => {
       per_page: itemsPerPage.value,
       ...filters.value,
       search: searchQuery.value,
-      sort: sortOrder.value,
+      sort: sortOrder.value === 'random' ? 'asc' : sortOrder.value, // Отправляем стандартную сортировку
     };
 
     Object.keys(params).forEach(key => {
@@ -451,7 +451,12 @@ const fetchData = async () => {
     }
 
     const response = await axios.get(`${thisUrl()}/realty/filter`, { params });
-    listings.value = response.data.listings || [];
+
+    // Применяем рандомизацию только если выбран соответствующий порядок
+    listings.value = sortOrder.value === 'random'
+        ? shuffleArray(response.data.listings || [])
+        : response.data.listings || [];
+
     propertyTypes.value = response.data.propertyTypes || [];
     renovationTypes.value = response.data.renovationTypes || [];
     totalItems.value = response.data.total || 0;
@@ -483,7 +488,14 @@ const handleSearch = () => {
     fetchData();
   }, 500);
 };
-
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
 let searchTimeout = null;
 
 const resetFilters = () => {
@@ -539,7 +551,10 @@ const updateRange = () => {
 };
 
 const toggleSortOrder = () => {
-  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  // Циклическое переключение между вариантами сортировки
+  const sortOptions = ['asc', 'desc', 'random'];
+  const currentIndex = sortOptions.indexOf(sortOrder.value);
+  sortOrder.value = sortOptions[(currentIndex + 1) % sortOptions.length];
   fetchData();
 };
 

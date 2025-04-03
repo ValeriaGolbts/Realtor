@@ -96,12 +96,23 @@ const listings = ref([]);
 const loading = ref(false);
 const error = ref(null);
 
+// Функция для перемешивания массива
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 const fetchRecentListings = async () => {
   loading.value = true;
   error.value = null;
   try {
     const response = await axios.get(`${thisUrl()}/realty/filter`);
-    listings.value = response.data.listings || [];
+    // Перемешиваем полученные объявления перед сохранением
+    listings.value = shuffleArray(response.data.listings || []);
   } catch (err) {
     error.value = 'Не удалось загрузить недавно просмотренные';
     console.error('Ошибка загрузки:', err);
