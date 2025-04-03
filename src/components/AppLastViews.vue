@@ -196,7 +196,11 @@ body {
   font-size: 21px;
   text-align: left;
 }
-
+.listing-info{
+  padding: 15px;
+  flex: 1;
+  color: rgb(17, 17, 17);
+}
 .listing {
   display: flex;
   flex-direction: column;

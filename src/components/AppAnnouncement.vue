@@ -65,7 +65,8 @@
           </div>
 
           <div class="author">
-            <span> {{ apartment.user || 'Автор не указан' }}</span>
+            <span v-if="apartment.owner">{{ apartment.owner.name }} {{ apartment.owner.patronymic }}</span>
+            <span v-else>Автор не указан</span>
           </div>
         </div>
       </section>
@@ -210,10 +211,17 @@ const handleReviewSubmitted = () => {
 
 const fetchApartmentData = async () => {
   try {
-    const response = await axios.get(`${thisUrl()}/realty/show/${apartmentId}`);
+    const response = await axios.get(`${thisUrl()}/realty/show/${apartmentId}`, {
+      params: {
+        with_user: true // Добавляем параметр, чтобы бэкенд включил данные пользователя
+      }
+    });
 
     if (response.data) {
       apartment.value = response.data;
+
+      // Проверяем структуру данных
+      console.log('Apartment data:', apartment.value);
 
       if (Array.isArray(apartment.value.images) && apartment.value.images.length > 0) {
         currentImage.value = apartment.value.images[0];
@@ -409,7 +417,7 @@ main {
   font-weight: bold;
   cursor: pointer;
   margin-bottom: 15px;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .author {

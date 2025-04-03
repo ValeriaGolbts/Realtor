@@ -644,6 +644,7 @@ onMounted(fetchData);
   color: #ff0000;
   font-size: 14px;
   margin-top: 5px;
+  margin-bottom: 2%;
 }
 
 .input.error,

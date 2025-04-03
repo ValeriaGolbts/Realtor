@@ -480,7 +480,11 @@ main {
   height: 370px;
   width: 100%;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
   cursor: pointer;
+}
+.listing:hover {
+  transform: translateY(-5px);
 }
 
 .listing-image-container {
