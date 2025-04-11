@@ -104,7 +104,7 @@ class RegistrationController extends Controller
             'patronymic' => $data['patronymic'],
             'phone' => $data['phone'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+            'password' => $data['password'],
         ]);
 
         Cache::forget('verified_email_' . $data['email']);
